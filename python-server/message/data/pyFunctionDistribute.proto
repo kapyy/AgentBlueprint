@@ -1,0 +1,25 @@
+syntax = "proto3";
+package protoData;
+option go_package = "message/grpc";
+import "dataIndexGen.proto";
+
+//Internal Python Service to distribute the apm request to individual functions
+service APMFunctionsService{
+
+
+  rpc InsertActionsWithObservation(TextPyRequest) returns(Actions);
+  rpc ActionFormatter(Action) returns (ParsedAction);
+
+}
+message GeneralPyRequest{
+  string prompt = 1;
+  optional string system_prompt = 2;
+}
+message TextPyRequest{
+  string prompt = 1;
+  string text = 2;
+  optional string system_prompt = 3;
+}
+
+
+

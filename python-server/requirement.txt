@@ -1,0 +1,8 @@
+grpcio
+grpcio-tools
+spacy==3.7.3
+grpcio-reflection
+numpy
+openai
+sentence_transformers
+transformers
