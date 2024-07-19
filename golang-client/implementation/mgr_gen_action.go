@@ -8,7 +8,7 @@ import (
 )
 
 type ActionManager struct {
-	Actions Actions
+	ActionList ActionList
 }
 
 func (m *ActionManager) GetDescriptor(index uint64, d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
@@ -25,12 +25,12 @@ func (m *ActionManager) GetDescriptor(index uint64, d bpcontext.DobitInterface, 
 }
 func (m *ActionManager) GetProps(list bpcontext.DataPropertyInterface, index uint64) ([]byte, string) {
 	log := logger.GetLogger().WithField("ActionManager", "GetProps")
-	listStruct, ok := list.(*Actions)
+	listStruct, ok := list.(*ActionList)
 	if !ok {
 		log.Debugf("Conversion failed.GetProps List does not hold a *Action")
 	}
 	interfaceObj, stringObj := listStruct.GetPropIndex(index)
-	serializeObj, ok := interfaceObj.(*protodata.Actions)
+	serializeObj, ok := interfaceObj.(*protodata.ActionList)
 	if !ok {
 		log.Debugf("Conversion failed.GetProps Return does not hold a *Action")
 	}

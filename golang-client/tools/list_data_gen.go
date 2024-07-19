@@ -75,9 +75,14 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 		//}))),
 		jen.Return(jen.Id("s").Dot(name)),
 	)
-	descp.Func().Params(jen.Id("s").Id("*" + dataEntry.Key)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/protoData", name)).Block(
-		jen.Id("s").Dot(name).Op("=").Id(strings.ToLower(name)),
-	)
+	descp.Func().Params(jen.Id("s").Id("*" + dataEntry.Key)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/protoData", name)).BlockFunc(func(g *jen.Group) {
+		for _, property := range sortedProperties {
+			if isEmbeddedProperty(property.Value.Type) {
+				g.Id("s").Dot("embedded_" + strings.ToLower(property.Key)).Dot("Set").Params(jen.Id(strings.ToLower(name)).Dot(property.Key))
+			}
+		}
+		g.Id("s").Dot(name).Op("=").Id(strings.ToLower(name))
+	})
 	descp.Func().Params(jen.Id("s").Id("*" + name)).Id("FullString").Call().Id("string").BlockFunc(func(g *jen.Group) {
 		var return_val = jen.Return()
 		firstprop := true
@@ -113,7 +118,7 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 			g.Id("s").Dot(name).Dot(prop_name).Op("=").Id(strings.ToLower(prop_name))
 		})
 		descp.Func().Params(jen.Id("s").Id("*"+name)).Id(prop_name+"String").Call().Id("string").Block(
-			jen.Comment("TODO: implement me"),
+			jen.Comment("TODO: implement me, this is where you write how you want you data to be recognized as natural language"),
 			jen.Panic(jen.Lit("implement me")),
 		)
 	}
@@ -147,19 +152,36 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 	)
 
 	if hasPlural {
-		descp.Type().Id(name + "s").Struct(
-			jen.Id(strings.ToLower(name + "s")).Id("[]*").Id(name),
+		descp.Type().Id(name + "List").Struct(
+			jen.Id(strings.ToLower(name + "List")).Id("[]*").Id(name),
 		)
-		descp.Func().Params(jen.Id("sl").Id("*"+name+"s")).Id("GetPropIndex").Params(jen.Id("index").Uint64()).Params(jen.Id("interface{}"), jen.Id("string")).Block(
-			jen.Id("protoList").Op(":=").Make(jen.Index().Id("*").Qual("golang-client/message/protoData", name), jen.Len(jen.Id("sl").Dot(strings.ToLower(name+"s")))),
+		//func (sl *Actions) Set(actions *protodata.Actions) {
+		//	sl.actions = make([]*Action, 0)
+		//	for _, protoAction := range actions.Actions {
+		//		action := &Action{}
+		//		action.Set(protoAction)
+		//		sl.actions = append(sl.actions, action)
+		//	}
+		//}
+		descp.Func().Params(jen.Id("sl").Id("*" + name + "List")).Id("Set").Params(jen.Id(strings.ToLower(name+"List")).Id("*").Qual("golang-client/message/protoData", name+"List")).BlockFunc(func(g *jen.Group) {
+			g.Id("sl").Dot(strings.ToLower(name+"List")).Op("=").Make(jen.Index().Op("*").Id(name), jen.Id("0"))
+			g.For(jen.Id("_,").Id("proto" + name).Op(":=").Range().Id(strings.ToLower(name + "List")).Dot(name + "List")).BlockFunc(func(gi *jen.Group) {
+				gi.Id(strings.ToLower(name)).Op(":=").Op("&").Id(name).Values()
+				gi.Id(strings.ToLower(name)).Dot("Set").Call(jen.Id("proto" + name))
+				gi.Id("sl").Dot(strings.ToLower(name+"List")).Op("=").Append(jen.Id("sl").Dot(strings.ToLower(name+"List")), jen.Id(strings.ToLower(name)))
+			})
+		})
+		descp.Func().Params(jen.Id("sl").Id("*"+name+"List")).Id("GetPropIndex").Params(jen.Id("index").Uint64()).Params(jen.Id("interface{}"), jen.Id("string")).Block(
+			jen.Id("protoList").Op(":=").Make(jen.Index().Id("*").Qual("golang-client/message/protoData", name), jen.Len(jen.Id("sl").Dot(strings.ToLower(name+"List")))),
 			jen.Id("stringList").Op(":=").Lit(""),
-			jen.For(jen.Id("i,").Id("s").Op(":=").Range().Id("sl").Dot(strings.ToLower(name+"s"))).Block(
+			jen.For(jen.Id("i,").Id("s").Op(":=").Range().Id("sl").Dot(strings.ToLower(name+"List"))).Block(
 				jen.Id("protoObj").Op(",").Id("stringObj").Op(":=").Id("s").Dot("GetPropIndex").Call(jen.Id("index")),
 				jen.Id("protoList").Index(jen.Id("i")).Op("=").Id("protoObj").Assert(jen.Op("*").Qual("golang-client/message/protoData", name)),
-				jen.Id("stringList").Op("+=").Id("stringObj"),
+				//stringList += strconv.Itoa(i) + ". " + stringObj + "\n"
+				jen.Id("stringList").Op("+=").Qual("strconv", "Itoa").Call(jen.Id("i")).Op("+").Lit(". ").Op("+").Id("stringObj").Op("+").Lit("\n"),
 			),
-			jen.Return(jen.Id("&").Qual("golang-client/message/protoData", name+"s").Values(jen.Dict{
-				jen.Id(name + "s"): jen.Id("protoList")}),
+			jen.Return(jen.Id("&").Qual("golang-client/message/protoData", name+"List").Values(jen.Dict{
+				jen.Id(name + "List"): jen.Id("protoList")}),
 				jen.Id("stringList")),
 		)
 	}
@@ -169,37 +191,38 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 
 func sysDataImplGen(impl *jen.File, name string, conf *YamlConfig) {
 	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("Default").Params(jen.Id("d").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
-		jen.Comment("TODO implement me"),
+		jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 		jen.Panic(jen.Lit("implement me")),
-		jen.Comment("bs := BaseObject{fulldescription: \"\"}\n\t\treturn &BaseObjects{baseobjects: []*BaseObject{&bs}}"),
+		jen.Comment("actions := &ActionList{}\n"+"actionList.Set(&protodata.ActionList{\n"+"Actions:[]*protodata.Action{\n"+"{\n"+"ActionDescription: \"go for a walk\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"},\n"+"},\n"+"})\n"+"return actionList\n"+"//ForPlural\n"+"action:=&Action{}\n"+"action.Set(&protodata.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
 	for _, desc := range conf.SystemData[name].Desc {
 		if conf.Descriptor[desc] != nil {
 			sortedDescriptorProperties := SortDescriptorProperty(conf.Descriptor[desc])
 			for _, proerty := range sortedDescriptorProperties {
 				impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id(proerty.Key).Params(jen.Id("d").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
-					jen.Comment("TODO implement me"),
+					jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 					jen.Panic(jen.Lit("implement me")),
 				)
 			}
 		}
 	}
-	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Block(
-		jen.Comment("TODO implement me"),
-		jen.Panic(jen.Lit("implement me")),
-		jen.Comment("\tswitch index {\n\tcase 3001: //MemoryDistillToLongTerm\n\t\tprotoData := protoData.MemoryLogs{}\n"+
-			"\t\terr := proto.Unmarshal(response, &protoData)\n\t\tif err != nil {\n"+
-			"\t\t\tlog.Fatal(\"MemoryLogs Props ByteStream Handled Error: \", err)\n\t\t}\n"+
-			"\t\tfmt.Print(\"MemoryDistillToLongTerm..MemoryLogs:\", protoData)\n\tcase 4001: //SummarizeAgent\n"+
-			"\t\tprotoData := protoData.MemoryLogs{}\n\t\terr := proto.Unmarshal(response, &protoData)\n\t\tif err != nil {\n"+
-			"\t\t\tlog.Fatal(\"MemoryLogs Props ByteStream Handled Error: \", err)\n\t\t}\n"+
-			"\t\tfmt.Print(\"SummarizeAgent..MemoryLogs:\", protoData)\n\n\t}"),
-	)
+
+	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).BlockFunc(func(g *jen.Group) {
+		g.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit(name+"Manager"), jen.Lit("SetServiceResponse"))
+		g.Id("proto"+name+"List").Op(":=").Op("&").Qual("golang-client/message/protoData", name+"List").Values()
+		g.Id("err").Op(":=").Qual("google.golang.org/protobuf/proto", "Unmarshal").Call(jen.Id("response"), jen.Id("proto"+name+"List"))
+		g.If(jen.Id("err").Op("!=").Nil()).Block(
+			jen.Id("log").Dot("Errorf").Call(jen.Lit(name+"s Props ByteStream Handled Error: %s"), jen.Id("err")),
+		)
+		g.Id(strings.ToLower(name) + "List").Op(":=").Op("&").Id(name + "List").Values()
+		g.Id(strings.ToLower(name) + "List").Dot("Set").Call(jen.Id("proto" + name + "List"))
+		g.Id("ctx").Dot("SetResultData").Call(jen.Id(strings.ToLower(name) + "List"))
+	})
 	// fmt.Printf("impl: %#v\n", impl)
 }
 func sysDataMgrGen(mgr *jen.File, name string, conf *YamlConfig) {
 	mgr.Type().Id(name + "Manager").Struct(
-		jen.Id(name + "s").Id(name + "s"),
+		jen.Id(name + "List").Id(name + "List"),
 	)
 	mgr.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("GetDescriptor").Params(jen.Id("index").Uint64(), jen.Id("d").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
 		jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit("GetDescriptor")),
@@ -228,12 +251,12 @@ func sysDataMgrGen(mgr *jen.File, name string, conf *YamlConfig) {
 	mgr.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("GetProps").Params(jen.Id("list").Qual("golang-client/bpcontext", "DataPropertyInterface"),
 		jen.Id("index").Uint64()).Params(jen.Id("[]byte"), jen.Id("string")).Block(
 		jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit(name+"Manager"), jen.Lit("GetProps")),
-		jen.Id("listStruct, ok").Op(":=").Id("list").Assert(jen.Op("*").Id(name+"s")),
+		jen.Id("listStruct, ok").Op(":=").Id("list").Assert(jen.Op("*").Id(name+"List")),
 		jen.If(jen.Op("!").Id("ok")).Block(
 			jen.Id("log").Dot("Debugf").Call(jen.Lit("Conversion failed.GetProps List does not hold a *"+name)),
 		),
 		jen.Id("interfaceObj, stringObj").Op(":=").Id("listStruct").Dot("GetPropIndex").Call(jen.Id("index")),
-		jen.Id("serializeObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/protoData", name+"s")),
+		jen.Id("serializeObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/protoData", name+"List")),
 		jen.If(jen.Op("!").Id("ok")).Block(
 			jen.Id("log").Dot("Debugf").Call(jen.Lit("Conversion failed.GetProps Return does not hold a *"+name)),
 		),

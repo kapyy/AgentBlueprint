@@ -1,43 +1,51 @@
 package implementation
 
-import bpcontext "golang-client/bpcontext"
+import (
+	bpcontext "golang-client/bpcontext"
+	protodata "golang-client/message/protoData"
+	logger "golang-client/modules/logger"
+	proto "google.golang.org/protobuf/proto"
+)
 
 func (m *ActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
-	// TODO implement me
+	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 	/*
-	   bs := BaseObject{fulldescription: ""}
-
-	   	return &BaseObjects{baseobjects: []*BaseObject{&bs}}
+	   actions := &ActionList{}
+	   actionList.Set(&protodata.ActionList{
+	   Actions:[]*protodata.Action{
+	   {
+	   ActionDescription: "go for a walk",
+	   Duration: 0,
+	   StartTime: 0,
+	   EndTime: 0,
+	   },
+	   },
+	   })
+	   return actionList
+	   //ForPlural
+	   action:=&Action{}
+	   action.Set(&protodata.Action{
+	   ActionDescription: "",
+	   Duration: 0,
+	   StartTime: 0,
+	   EndTime: 0,
+	   })
+	   return action
 	*/
 }
 func (m *ActionManager) Current(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
-	// TODO implement me
+	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 }
 func (m *ActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) {
-	// TODO implement me
-	panic("implement me")
-	/*
-	   switch index {
-	   case 3001: //MemoryDistillToLongTerm
-
-	   	protoData := protoData.MemoryLogs{}
-	   	err := proto.Unmarshal(response, &protoData)
-	   	if err != nil {
-	   		log.Fatal("MemoryLogs Props ByteStream Handled Error: ", err)
-	   	}
-	   	fmt.Print("MemoryDistillToLongTerm..MemoryLogs:", protoData)
-
-	   case 4001: //SummarizeAgent
-
-	   	protoData := protoData.MemoryLogs{}
-	   	err := proto.Unmarshal(response, &protoData)
-	   	if err != nil {
-	   		log.Fatal("MemoryLogs Props ByteStream Handled Error: ", err)
-	   	}
-	   	fmt.Print("SummarizeAgent..MemoryLogs:", protoData)
-
-	   }
-	*/
+	log := logger.GetLogger().WithField("ActionManager", "SetServiceResponse")
+	protoActionList := &protodata.ActionList{}
+	err := proto.Unmarshal(response, protoActionList)
+	if err != nil {
+		log.Errorf("Actions Props ByteStream Handled Error: %s", err)
+	}
+	actionList := &ActionList{}
+	actionList.Set(protoActionList)
+	ctx.SetResultData(actionList)
 }

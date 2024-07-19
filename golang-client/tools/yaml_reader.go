@@ -120,4 +120,5 @@ func ReadDataDescriptor(overwrite bool) {
 	internalDataGen(conf)
 	sysDataGen(conf, overwrite) // Has overwrite para
 	extDataGen(conf, overwrite) // has overwrite para
+	protoGen(conf)
 }

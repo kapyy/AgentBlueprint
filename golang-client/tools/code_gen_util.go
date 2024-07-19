@@ -1,11 +1,20 @@
 package tools
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
 )
 
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func ToSnakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
+}
 func isBaseType(propType string) bool {
 	return propType == "int32" || propType == "string" || propType == "bool" || propType == "uint64" || propType == "float32" || propType == "uint32"
 }

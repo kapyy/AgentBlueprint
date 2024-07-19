@@ -58,31 +58,32 @@ func extDataGen(conf *YamlConfig, overwrite bool) {
 
 func extDataImplGen(impl *jen.File, name string, conf *YamlConfig) {
 	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("Default").Params(jen.Id("d").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
-		jen.Comment("TODO implement me"),
+		jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 		jen.Panic(jen.Lit("implement me")),
-		jen.Comment("ml := MemoryLog{startTime: 100, endTime: 200, actionDescription: \"test\"}\n\treturn DataPropertyInterface{&ml}"),
+
+		jen.Comment("action:=&Action{}\n"+"action.Set(&protodata.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
 	for _, desc := range conf.ExternalData[name].Desc {
 		if conf.Descriptor[desc] != nil {
 			for desc_name := range conf.Descriptor[desc] {
 				impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id(desc_name).Params(jen.Id("d").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
-					jen.Comment("TODO implement me"),
+					jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 					jen.Panic(jen.Lit("implement me")),
 				)
 			}
 		}
 	}
-	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Block(
-		jen.Comment("Currently Not In Use"),
-
-		jen.Comment("\tswitch index {\n\tcase 3001: //MemoryDistillToLongTerm\n\t\tprotoData := protoData.MemoryLogs{}\n"+
-			"\t\terr := proto.Unmarshal(response, &protoData)\n\t\tif err != nil {\n"+
-			"\t\t\tlog.Fatal(\"MemoryLogs Props ByteStream Handled Error: \", err)\n\t\t}\n"+
-			"\t\tfmt.Print(\"MemoryDistillToLongTerm..MemoryLogs:\", protoData)\n\tcase 4001: //SummarizeAgent\n"+
-			"\t\tprotoData := protoData.MemoryLogs{}\n\t\terr := proto.Unmarshal(response, &protoData)\n\t\tif err != nil {\n"+
-			"\t\t\tlog.Fatal(\"MemoryLogs Props ByteStream Handled Error: \", err)\n\t\t}\n"+
-			"\t\tfmt.Print(\"SummarizeAgent..MemoryLogs:\", protoData)\n\n\t}"),
-	)
+	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "DobitInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).BlockFunc(func(g *jen.Group) {
+		g.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit(name+"Manager"), jen.Lit("SetServiceResponse"))
+		g.Id("proto"+name).Op(":=").Op("&").Qual("golang-client/message/protoData", name).Values()
+		g.Id("err").Op(":=").Qual("google.golang.org/protobuf/proto", "Unmarshal").Call(jen.Id("response"), jen.Id("proto"+name))
+		g.If(jen.Id("err").Op("!=").Nil()).Block(
+			jen.Id("log").Dot("Errorf").Call(jen.Lit(name+" Props ByteStream Handled Error: %s"), jen.Id("err")),
+		)
+		g.Id(strings.ToLower(name)).Op(":=").Op("&").Id(name).Values()
+		g.Id(strings.ToLower(name)).Dot("Set").Call(jen.Id("proto" + name))
+		g.Id("ctx").Dot("SetResultData").Call(jen.Id(strings.ToLower(name)))
+	})
 	// fmt.Printf("extDataImplGen: %v\n", impl)
 }
 func extDataMgrGen(mgr *jen.File, name string, conf *YamlConfig) {

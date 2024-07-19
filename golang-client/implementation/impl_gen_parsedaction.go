@@ -1,35 +1,34 @@
 package implementation
 
-import bpcontext "golang-client/bpcontext"
+import (
+	bpcontext "golang-client/bpcontext"
+	protodata "golang-client/message/protoData"
+	logger "golang-client/modules/logger"
+	proto "google.golang.org/protobuf/proto"
+)
 
 func (m *ParsedActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
-	// TODO implement me
+	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 	/*
-	   ml := MemoryLog{startTime: 100, endTime: 200, actionDescription: "test"}
-
-	   	return DataPropertyInterface{&ml}
+	   action:=&Action{}
+	   action.Set(&protodata.Action{
+	   ActionDescription: "",
+	   Duration: 0,
+	   StartTime: 0,
+	   EndTime: 0,
+	   })
+	   return action
 	*/
 }
 func (m *ParsedActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) {
-	// Currently Not In Use
-	/*
-		switch index {
-		case 3001: //MemoryDistillToLongTerm
-			protoData := protoData.MemoryLogs{}
-			err := proto.Unmarshal(response, &protoData)
-			if err != nil {
-				log.Fatal("MemoryLogs Props ByteStream Handled Error: ", err)
-			}
-			fmt.Print("MemoryDistillToLongTerm..MemoryLogs:", protoData)
-		case 4001: //SummarizeAgent
-			protoData := protoData.MemoryLogs{}
-			err := proto.Unmarshal(response, &protoData)
-			if err != nil {
-				log.Fatal("MemoryLogs Props ByteStream Handled Error: ", err)
-			}
-			fmt.Print("SummarizeAgent..MemoryLogs:", protoData)
-
-		}
-	*/
+	log := logger.GetLogger().WithField("ParsedActionManager", "SetServiceResponse")
+	protoParsedAction := &protodata.ParsedAction{}
+	err := proto.Unmarshal(response, protoParsedAction)
+	if err != nil {
+		log.Errorf("ParsedAction Props ByteStream Handled Error: %s", err)
+	}
+	parsedaction := &ParsedAction{}
+	parsedaction.Set(protoParsedAction)
+	ctx.SetResultData(parsedaction)
 }
