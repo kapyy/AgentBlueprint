@@ -19,6 +19,7 @@ func (d *DobitEntity) GetDataManager(mgr int) bpcontext.DataManagerInterface {
 func (d *DobitEntity) InsertActionsWithObservation(datactx bpcontext.QueryContextInterface) {
 	query := d.Queries[310400400]
 	ctx := bpcontext.Context(d, datactx)
+	query.BPFunctionNodes.FunctionParam.InputText = datactx.InputText()
 	query.call(d, ctx)
 }
 
