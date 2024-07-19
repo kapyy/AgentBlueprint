@@ -6,8 +6,8 @@ import logging
 import grpc
 
 import message.data.dataIndexGen_pb2
-from message.data.pyFunctionDistribute_pb2 import GeneralPyRequest, TextPyRequest
-from message.data.pyFunctionDistribute_pb2_grpc import APMFunctionsServiceStub
+from message.data.functionDistribute_pb2 import GeneralPyRequest
+from message.data.functionDistribute_pb2_grpc import APMFunctionsServiceStub
 import apmFunctionFactory.apm_factory_data as apm_factory_data
 
 config_parser = configparser.ConfigParser()
@@ -32,6 +32,7 @@ def SubServicerDistributionCaller(id, rqst):
             return stub.ActionFormatter(rqst)
 
 
+#The Second Value are returned when Minor Function is used only
 def MainServicerDistributorCaller(id, context):
     with grpc.insecure_channel(config_parser['server.setting']['FunctionURL']) as channel:
         try:
@@ -49,7 +50,7 @@ def MainServicerDistributorCaller(id, context):
             request = GeneralPyRequest(prompt=context["prompt"], system_prompt=context["system"])
             return stub.GenerateFatigueHabitAction(request), "No String Format"
         elif id == 310400400:
-            request = TextPyRequest(prompt=context["prompt"], text=context["text_input"])
+            request = GeneralPyRequest(prompt=context["prompt"], text=context["text_input"])
             return stub.InsertActionsWithObservation(request), "No String Format"
 
         else:

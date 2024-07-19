@@ -52,6 +52,30 @@ func (yc *DataYamlConfig) readYamlFile(filename string) *DataYamlConfig {
 	}
 	return yc
 }
+func (yc *DataYamlConfig) getDataFromIndex(id int) (string, *DataEntry) {
+	for key, value := range yc.SystemData {
+		if value.Index == id {
+			return "SystemData", &DataEntry{key, value}
+		}
+	}
+	for key, value := range yc.ExternalData {
+		if value.Index == id {
+			return "ExternalData", &DataEntry{key, value}
+		}
+	}
+	for key, value := range yc.InternalData {
+		if value.Index == id {
+			return "InternalData", &DataEntry{key, value}
+		}
+	}
+	for key, value := range yc.ConnectorData {
+		if value.Index == id {
+			return "ConnectorData", &DataEntry{key, value}
+		}
+	}
+	return "", nil
+
+}
 
 type FunctionFmt struct {
 	Type     string `yaml:"Type"`
@@ -141,7 +165,7 @@ func SortFunction(functions map[string]FunctionFmt) []sortedFunction {
 	})
 	return sortedFunctions
 }
-func ReadDataDescriptor(overwrite bool) {
+func ReadDataDescriptor() *DataYamlConfig {
 	var dyc DataYamlConfig
 	abspath, err := filepath.Abs("./config/DataIndexGen.yaml")
 	if err != nil {
@@ -150,14 +174,17 @@ func ReadDataDescriptor(overwrite bool) {
 	conf := dyc.readYamlFile(abspath)
 	fmt.Println("conf:", conf)
 
-	descriptorGen(conf)
-	entityGen(conf)
-	internalDataGen(conf)
-	sysDataGen(conf, overwrite) // Has overwrite para
-	extDataGen(conf, overwrite) // has overwrite para
-	protoGen(conf)
+	return conf
 }
-func ReadFunctions() {
+func GenData(config *DataYamlConfig, overwrite bool) {
+	descriptorGen(config)
+	entityGen(config)
+	internalDataGen(config)
+	sysDataGen(config, overwrite) // Has overwrite para
+	extDataGen(config, overwrite) // has overwrite para
+	protoDataGen(config)
+}
+func ReadFunctions() *FunctionYamlConfig {
 	var fyc FunctionYamlConfig
 	abspath, err := filepath.Abs("./config/FunctionIndexGen.yaml")
 	if err != nil {
@@ -165,7 +192,12 @@ func ReadFunctions() {
 	}
 	conf := fyc.readYamlFile(abspath)
 	fmt.Println("conf:", conf)
-	entityFunctionGen(conf)
-	entityInterfaceGen(conf)
 
+	return conf
+}
+func GenFunction(dataConf *DataYamlConfig, functionConf *FunctionYamlConfig) {
+	entityFunctionGen(functionConf)
+	entityInterfaceGen(functionConf)
+	reflectionGen(functionConf)
+	protoFunctionGen(dataConf, functionConf)
 }

@@ -73,3 +73,35 @@ func entityInterfaceGen(conf *FunctionYamlConfig) {
 		return
 	}
 }
+
+//	func GetDataIDFromFunctionID(functionID uint64) uint64 {
+//		switch functionID {
+//		case 100100100:
+//			return 1001 //SomeFunction>>Actions
+//		default:
+//			return 1
+//		}
+//	}
+func reflectionGen(conf *FunctionYamlConfig) {
+	f := jen.NewFilePathName("implementation", "implementation")
+	f.Func().Id("GetDataIDFromFunctionID").Params(jen.Id("functionID").Uint64()).Uint64().Block(
+		jen.Switch(jen.Id("functionID")).BlockFunc(func(g *jen.Group) {
+			sortFunctions := SortFunction(conf.Functions)
+			for _, function := range sortFunctions {
+				if function.Value.Type != "MinorFunction" {
+					g.Case(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID))).Block(jen.Return(jen.Lit(function.Value.OutputID)))
+				}
+
+			}
+			g.Default().Block(
+				jen.Return(jen.Lit(1)),
+			)
+		}),
+	)
+
+	fmt.Printf("f:%#v\n", f)
+	err := f.Save("implementation/service_reflection_gen.go")
+	if err != nil {
+		return
+	}
+}

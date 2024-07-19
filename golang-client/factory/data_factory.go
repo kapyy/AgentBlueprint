@@ -15,8 +15,8 @@ func deserializeData(dataID uint64, ctx *bpcontext.AgentContext) ([]byte, string
 	cacheIndex := dataType*100 + descriptor
 
 	var data bpcontext.DataPropertyInterface
-	//Abstract dataType does not goes in cache
-	if dataType == 4015 || dataType == 4022 || dataType == 4023 || dataType == 4027 {
+	//TODO Abstract dataType does not goes in cache
+	if dataType == 0 {
 		data = dataMgr.GetDescriptor(descriptor, ctx.Dobit, ctx.DataContext)
 	} else {
 		//cache_data, exist := properties_map[cache_index]

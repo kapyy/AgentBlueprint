@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func protoGen(conf *DataYamlConfig) {
+func protoDataGen(conf *DataYamlConfig) {
 	f, err := os.Create("message/protoData/dataIndexGen.proto")
 	if err != nil {
 		fmt.Println(err)
@@ -48,5 +48,64 @@ func protoGen(conf *DataYamlConfig) {
 		f.WriteString("}\n")
 	}
 	f.Close()
+}
 
+//syntax = "proto3";
+//package protoData;
+//option go_package = "message/grpc";
+//import "dataIndexGen.proto";
+//
+////Internal Python Service to distribute the apm request to individual functions
+//service APMFunctionsService{
+//
+//
+//rpc InsertActionsWithObservation(TextPyRequest) returns(Actions);
+//rpc ActionFormatter(Action) returns (ParsedAction);
+//
+//}
+//message GeneralPyRequest{
+//string prompt = 1;
+//string text = 2;
+//optional string system_prompt = 2;
+
+func protoFunctionGen(dataConf *DataYamlConfig, conf *FunctionYamlConfig) {
+	f, err := os.Create("message/protoData/functionDistribute.proto")
+	if err != nil {
+		fmt.Println(err)
+	}
+	f.WriteString("syntax = \"proto3\";\n")
+	f.WriteString("package protoData;\n")
+	f.WriteString("option go_package = \"golang-client/message\";\n")
+	f.WriteString("import \"dataIndexGen.proto\";\n")
+	f.WriteString("//Internal Python Service to distribute the apm request to individual functions\n")
+	f.WriteString("service APMFunctionsService{\n")
+	sortFunction := SortFunction(conf.Functions)
+	for _, function := range sortFunction {
+		name := function.Key
+		var inputData, outputData string
+		switch function.Value.Type {
+		case "DefaultFunction":
+			inputData = "GeneralPyRequest"
+			outDataType, outDataName := dataConf.getDataFromIndex(function.Value.OutputID)
+			if outDataType == "SystemData" {
+				outputData = outDataName.Key + "List"
+			} else {
+				outputData = outDataName.Key
+			}
+		case "StaticFunction":
+			_, inDataName := dataConf.getDataFromIndex(function.Value.InputID)
+			inputData = inDataName.Key
+			_, outDataName := dataConf.getDataFromIndex(function.Value.OutputID)
+			outputData = outDataName.Key
+		default:
+		}
+		f.WriteString("rpc " + name + "(" + inputData + ") returns(" + outputData + ");\n")
+	}
+	f.WriteString("}\n")
+	f.WriteString("message GeneralPyRequest{\n")
+	f.WriteString("string prompt = 1;\n")
+	f.WriteString("string text = 2;\n")
+	f.WriteString("optional string system_prompt = 3;\n")
+	f.WriteString("}\n")
+	f.Close()
 }

@@ -1,7 +1,6 @@
-import random
 
 import message.data.dataIndexGen_pb2
-import message.data.pyFunctionDistribute_pb2_grpc
+import message.data.functionDistribute_pb2_grpc
 from ops.string_to_emoji import StringToEmoji
 from prompt_template import template, response_format, system
 
@@ -38,7 +37,7 @@ class APMFunctionsServiceServicer(object):
         )
 
         data = parse_json_list(result)
-        actions = message.data.dataIndexGen_pb2.Actions()
+        actions = message.data.dataIndexGen_pb2.ActionList()
         if data is None:
             return actions
         for action in data:
@@ -48,13 +47,12 @@ class APMFunctionsServiceServicer(object):
                 action_description=action_desc,
                 duration=duration,
             )
-            actions.actions.append(action)
+            actions.action_list.append(action)
         return actions
-    
+
 
     def ActionFormatter(self, request, context):
         fmt_action = message.data.dataIndexGen_pb2.ParsedAction()
         emoji_list = StringToEmoji(request.action_description)
-
-        fmt_action.EmojiList = emoji_list
+        fmt_action.emoji_list = emoji_list
         return fmt_action

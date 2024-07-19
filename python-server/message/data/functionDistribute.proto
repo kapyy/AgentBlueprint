@@ -1,0 +1,14 @@
+syntax = "proto3";
+package protoData;
+option go_package = "golang-client/message";
+import "dataIndexGen.proto";
+//Internal Python Service to distribute the apm request to individual functions
+service APMFunctionsService{
+rpc InsertActionWithObservation(GeneralPyRequest) returns(ActionList);
+rpc ActionFormatter(Action) returns(ParsedAction);
+}
+message GeneralPyRequest{
+string prompt = 1;
+string text = 2;
+optional string system_prompt = 3;
+}

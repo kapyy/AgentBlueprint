@@ -5,6 +5,14 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class EmojiData(_message.Message):
+    __slots__ = ("emoji_description", "emoji_unicode")
+    EMOJI_DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
+    EMOJI_UNICODE_FIELD_NUMBER: _ClassVar[int]
+    emoji_description: str
+    emoji_unicode: str
+    def __init__(self, emoji_description: _Optional[str] = ..., emoji_unicode: _Optional[str] = ...) -> None: ...
+
 class Action(_message.Message):
     __slots__ = ("action_description", "duration", "start_time", "end_time")
     ACTION_DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
@@ -17,22 +25,14 @@ class Action(_message.Message):
     end_time: int
     def __init__(self, action_description: _Optional[str] = ..., duration: _Optional[int] = ..., start_time: _Optional[int] = ..., end_time: _Optional[int] = ...) -> None: ...
 
-class Actions(_message.Message):
-    __slots__ = ("actions",)
-    ACTIONS_FIELD_NUMBER: _ClassVar[int]
-    actions: _containers.RepeatedCompositeFieldContainer[Action]
-    def __init__(self, actions: _Optional[_Iterable[_Union[Action, _Mapping]]] = ...) -> None: ...
-
-class EmojiData(_message.Message):
-    __slots__ = ("emoji_description", "emoji_unicode")
-    EMOJI_DESCRIPTION_FIELD_NUMBER: _ClassVar[int]
-    EMOJI_UNICODE_FIELD_NUMBER: _ClassVar[int]
-    emoji_description: str
-    emoji_unicode: str
-    def __init__(self, emoji_description: _Optional[str] = ..., emoji_unicode: _Optional[str] = ...) -> None: ...
+class ActionList(_message.Message):
+    __slots__ = ("action_list",)
+    ACTION_LIST_FIELD_NUMBER: _ClassVar[int]
+    action_list: _containers.RepeatedCompositeFieldContainer[Action]
+    def __init__(self, action_list: _Optional[_Iterable[_Union[Action, _Mapping]]] = ...) -> None: ...
 
 class ParsedAction(_message.Message):
-    __slots__ = ("EmojiList",)
-    EMOJILIST_FIELD_NUMBER: _ClassVar[int]
-    EmojiList: EmojiData
-    def __init__(self, EmojiList: _Optional[_Union[EmojiData, _Mapping]] = ...) -> None: ...
+    __slots__ = ("emoji_list",)
+    EMOJI_LIST_FIELD_NUMBER: _ClassVar[int]
+    emoji_list: EmojiData
+    def __init__(self, emoji_list: _Optional[_Union[EmojiData, _Mapping]] = ...) -> None: ...

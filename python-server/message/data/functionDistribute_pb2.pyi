@@ -6,14 +6,6 @@ from typing import ClassVar as _ClassVar, Optional as _Optional
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class GeneralPyRequest(_message.Message):
-    __slots__ = ("prompt", "system_prompt")
-    PROMPT_FIELD_NUMBER: _ClassVar[int]
-    SYSTEM_PROMPT_FIELD_NUMBER: _ClassVar[int]
-    prompt: str
-    system_prompt: str
-    def __init__(self, prompt: _Optional[str] = ..., system_prompt: _Optional[str] = ...) -> None: ...
-
-class TextPyRequest(_message.Message):
     __slots__ = ("prompt", "text", "system_prompt")
     PROMPT_FIELD_NUMBER: _ClassVar[int]
     TEXT_FIELD_NUMBER: _ClassVar[int]

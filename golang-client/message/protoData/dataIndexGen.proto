@@ -3,15 +3,15 @@ package protoData;
 option go_package = "golang-client/message";
 // --------------InternalData--------
 message EmojiData {
-	string emoji_unicode = 2;
 	string emoji_description = 1;
+	string emoji_unicode = 2;
 }
 // --------------SystemData--------
 message Action {
+	string action_description = 1;
 	int32 duration = 2;
 	uint64 start_time = 3;
 	uint64 end_time = 4;
-	string action_description = 1;
 }
 message ActionList {
 	repeated Action action_list = 1;

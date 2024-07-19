@@ -4,7 +4,7 @@ import grpc
 import warnings
 
 import dataIndexGen_pb2 as dataIndexGen__pb2
-import pyFunctionDistribute_pb2 as pyFunctionDistribute__pb2
+import functionDistribute_pb2 as functionDistribute__pb2
 
 GRPC_GENERATED_VERSION = '1.65.1'
 GRPC_VERSION = grpc.__version__
@@ -21,7 +21,7 @@ except ImportError:
 if _version_not_supported:
     warnings.warn(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in pyFunctionDistribute_pb2_grpc.py depends on'
+        + f' but the generated code in functionDistribute_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -41,10 +41,10 @@ class APMFunctionsServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.InsertActionsWithObservation = channel.unary_unary(
-                '/protoData.APMFunctionsService/InsertActionsWithObservation',
-                request_serializer=pyFunctionDistribute__pb2.TextPyRequest.SerializeToString,
-                response_deserializer=dataIndexGen__pb2.Actions.FromString,
+        self.InsertActionWithObservation = channel.unary_unary(
+                '/protoData.APMFunctionsService/InsertActionWithObservation',
+                request_serializer=functionDistribute__pb2.GeneralPyRequest.SerializeToString,
+                response_deserializer=dataIndexGen__pb2.ActionList.FromString,
                 _registered_method=True)
         self.ActionFormatter = channel.unary_unary(
                 '/protoData.APMFunctionsService/ActionFormatter',
@@ -57,7 +57,7 @@ class APMFunctionsServiceServicer(object):
     """Internal Python Service to distribute the apm request to individual functions
     """
 
-    def InsertActionsWithObservation(self, request, context):
+    def InsertActionWithObservation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -72,10 +72,10 @@ class APMFunctionsServiceServicer(object):
 
 def add_APMFunctionsServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'InsertActionsWithObservation': grpc.unary_unary_rpc_method_handler(
-                    servicer.InsertActionsWithObservation,
-                    request_deserializer=pyFunctionDistribute__pb2.TextPyRequest.FromString,
-                    response_serializer=dataIndexGen__pb2.Actions.SerializeToString,
+            'InsertActionWithObservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.InsertActionWithObservation,
+                    request_deserializer=functionDistribute__pb2.GeneralPyRequest.FromString,
+                    response_serializer=dataIndexGen__pb2.ActionList.SerializeToString,
             ),
             'ActionFormatter': grpc.unary_unary_rpc_method_handler(
                     servicer.ActionFormatter,
@@ -95,7 +95,7 @@ class APMFunctionsService(object):
     """
 
     @staticmethod
-    def InsertActionsWithObservation(request,
+    def InsertActionWithObservation(request,
             target,
             options=(),
             channel_credentials=None,
@@ -108,9 +108,9 @@ class APMFunctionsService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/protoData.APMFunctionsService/InsertActionsWithObservation',
-            pyFunctionDistribute__pb2.TextPyRequest.SerializeToString,
-            dataIndexGen__pb2.Actions.FromString,
+            '/protoData.APMFunctionsService/InsertActionWithObservation',
+            functionDistribute__pb2.GeneralPyRequest.SerializeToString,
+            dataIndexGen__pb2.ActionList.FromString,
             options,
             channel_credentials,
             insecure,
