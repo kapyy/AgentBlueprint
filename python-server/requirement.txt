@@ -6,3 +6,4 @@ numpy
 openai
 sentence_transformers
 transformers
+pyyaml

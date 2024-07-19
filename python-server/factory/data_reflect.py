@@ -5,9 +5,11 @@ from grpc_reflection.v1alpha.proto_reflection_descriptor_database import (
     ProtoReflectionDescriptorDatabase,
 )
 
-from apmFunctionFactory.apm_factory_dict_data_gen import getMessageName
+from .dict_data_gen import getMessageName
 
 
+################ NOT IN USE ################
+# reflection are done directly from switch case
 #
 # def run():
 #     print("Will try to greet world ...")

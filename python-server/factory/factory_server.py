@@ -8,7 +8,7 @@ from grpc_reflection.v1alpha import reflection
 
 from message.data import functionDistribute_pb2,functionDistribute_pb2_grpc
 
-from factory.function_servicer_implementation import APMFunctionsServiceServicer
+from function.function_servicer_implementation import APMFunctionsServiceServicer
 
 
 def FactoryServerStart():

@@ -2,10 +2,9 @@ from concurrent import futures
 import logging
 import grpc
 
-from message.data.pythonServicer_pb2_grpc import APMServiceServicer, add_APMServiceServicer_to_server, \
-    add_SubFunctionalServiceServicer_to_server, SubFunctionalServiceServicer
-from message.data.pythonServicer_pb2 import MainServicerRequest, ServiceResponse, WordList, WordVec, SentenceVec
-from apmFunctionFactory.apm_factory_function import DeserializeFunctionNode, CallSubordinateFunction
+from message.data.pythonServicer_pb2_grpc import APMServiceServicer, add_APMServiceServicer_to_server
+from message.data.pythonServicer_pb2 import ServiceResponse
+from factory.factory_handler import DeserializeFunctionNode, CallSubordinateFunction
 from util.service_config import SerivceConfig
 
 logger = logging.getLogger("kotoko.debug")
