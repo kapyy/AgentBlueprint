@@ -4,4 +4,5 @@ import "golang-client/tools"
 
 func main() {
 	tools.ReadDataDescriptor(true)
+	tools.ReadFunctions()
 }

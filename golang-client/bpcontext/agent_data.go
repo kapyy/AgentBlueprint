@@ -58,14 +58,14 @@ func NewDataInstanceWithContext(data DataPropertyInterface, context DataInstance
 }
 
 type DataProcessorInterface interface {
-	Process(entity DobitInterface, instances ...*DataInstance)
+	Process(entity AgentInterface, instances ...*DataInstance)
 }
 
 type DataManagerInterface interface {
-	Init(dobit DobitInterface)
+	Init(dobit AgentInterface)
 	InsertDataInstance(instance *DataInstance)
-	Update(DobitInterface)
-	GetProcessor(tag int) func(entity DobitInterface, ctx ...*DataInstance)
+	Update(AgentInterface)
+	GetProcessor(tag int) func(entity AgentInterface, ctx ...*DataInstance)
 	Event() InternalEventInterface
 	AddListener(eventType int, listener Listener)
 	GetFirstTaggedDataInstance(tag ...int) *DataInstance

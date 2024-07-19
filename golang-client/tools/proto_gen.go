@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func protoGen(conf *YamlConfig) {
+func protoGen(conf *DataYamlConfig) {
 	f, err := os.Create("message/protoData/dataIndexGen.proto")
 	if err != nil {
 		fmt.Println(err)

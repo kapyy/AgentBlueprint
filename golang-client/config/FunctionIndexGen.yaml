@@ -1,0 +1,14 @@
+#DefaultFunction --1
+#MinorFunction --2
+#StaticFunction --3 with static input and output
+Functions:
+  InsertActionWithObservation:
+    Type: DefaultFunction
+    FunctionID: 10000001 #must be 8 digits
+    InputNode: 0 # Only used when its a static function
+    OutputNode: 1001
+  ActionFormatter:
+    Type: StaticFunction
+    FunctionID: 10000002 #must be 8 digits
+    InputNode: 1001 # default is all singular
+    OutputNode: 4001

@@ -21,7 +21,7 @@ func IsDataNode(nodeId uint64) bool {
 func IsFunctionNode(nodeId uint64) bool {
 	return nodeId/uint64(math.Pow10(9)) == 0
 }
-func deserializeFunctionNode(function_node *message.NodeData, ctx *bpcontext.DobitContext) *message.NodeData {
+func deserializeFunctionNode(function_node *message.NodeData, ctx *bpcontext.AgentContext) *message.NodeData {
 	log := logger.GetLogger().WithField("func", "deserializeFunctionNode")
 	var functionPrompts string
 	if function_node != nil && function_node.FunctionParam != nil {
@@ -41,6 +41,7 @@ func deserializeFunctionNode(function_node *message.NodeData, ctx *bpcontext.Dob
 
 	switch ExtractNodeType(function_node.NodeId) {
 	case 1: // prompt input
+		functionNodeData.InputText = ctx.DataContext.InputText()
 		for index, node := range function_node.NodeStructure.InputNodes {
 			if IsDataNode(node.NodeId) {
 				//only for the service that with prompt inputs
@@ -62,24 +63,22 @@ func deserializeFunctionNode(function_node *message.NodeData, ctx *bpcontext.Dob
 			}
 			nodeConnector.InputNodes[index] = deserializeFunctionNode(node, ctx)
 		}
-	case 3: // TextInputMainServiceFunction
-		functionNodeData.InputText = ctx.DataContext.InputText()
-		for index, node := range function_node.NodeStructure.InputNodes {
-			if IsDataNode(node.NodeId) {
-				_, prompts := deserializeDataNode(node, ctx)
-				//concatenate prompts
-				functionPrompts = replaceIndexInPrompts(functionPrompts, index, prompts)
-				//log.Print("FunctionPrompt:", functionPrompts)
-				functionNodeData.FunctionPrompt = &functionPrompts
-				//TODO <<<<<<<need Review
-
-				//makelog.Debugf("InputText: %s With FunctionNode: %d", *functionNodeData.InputText, function_node.NodeId)
-				continue
-			}
-			nodeConnector.InputNodes[index] = deserializeFunctionNode(node, ctx)
-		}
+		//case 3: // TextInputMainServiceFunction
+		//	functionNodeData.InputText = ctx.DataContext.InputText()
+		//	for index, node := range function_node.NodeStructure.InputNodes {
+		//		if IsDataNode(node.NodeId) {
+		//			_, prompts := deserializeDataNode(node, ctx)
+		//			//concatenate prompts
+		//			functionPrompts = replaceIndexInPrompts(functionPrompts, index, prompts)
+		//			//log.Print("FunctionPrompt:", functionPrompts)
+		//			functionNodeData.FunctionPrompt = &functionPrompts
+		//
+		//			//makelog.Debugf("InputText: %s With FunctionNode: %d", *functionNodeData.InputText, function_node.NodeId)
+		//			continue
+		//		}
+		//		nodeConnector.InputNodes[index] = deserializeFunctionNode(node, ctx)
+		//	}
 	}
-	//attach none string function_node structure into Input Data Object
 
 	return &message.NodeData{
 		NodeId:        function_node.NodeId,
@@ -88,7 +87,7 @@ func deserializeFunctionNode(function_node *message.NodeData, ctx *bpcontext.Dob
 	}
 
 }
-func deserializeDataNode(data *message.NodeData, ctx *bpcontext.DobitContext) ([]byte, string) {
+func deserializeDataNode(data *message.NodeData, ctx *bpcontext.AgentContext) ([]byte, string) {
 	//log := logger.GetLogger().WithField("func", "deserializeDataNode")
 
 	switch ExtractNodeType(data.NodeId) {
@@ -126,7 +125,7 @@ func replaceIndexInPrompts(origPrompts string, index int32, returnPrompts string
 	//log.Debugf("index %v, orig: %v, replace: %v, return: %v", index, origPrompts, replacestr, returnPrompts)
 	return strings.Replace(origPrompts, replacestr, returnPrompts, -1)
 }
-func DeserializeRootNode(data *message.NodeData, ctx *bpcontext.DobitContext) (*message.NodeData, error) {
+func DeserializeRootNode(data *message.NodeData, ctx *bpcontext.AgentContext) (*message.NodeData, error) {
 	log := logger.GetLogger().WithField("func", "DeserializeRootNode")
 	if data == nil {
 		log.Errorf("RootNode: Root node is nil")

@@ -5,7 +5,7 @@ import (
 	"golang-client/modules/logger"
 )
 
-func deserializeData(dataID uint64, ctx *bpcontext.DobitContext) ([]byte, string) {
+func deserializeData(dataID uint64, ctx *bpcontext.AgentContext) ([]byte, string) {
 	log := logger.GetLogger().WithField("func", "deserializeData").WithField("dataID", dataID)
 	dataType, descriptor, property := DisassembleDataID(dataID)
 	dataMgr := bpcontext.GetDataManager(dataType)

@@ -1,7 +1,9 @@
 package implementation
 
 import (
+	bpcontext "golang-client/bpcontext"
 	protodata "golang-client/message/protoData"
+	proto "google.golang.org/protobuf/proto"
 	"strconv"
 )
 
@@ -58,20 +60,23 @@ func (s *Action) StartTimeString() string {
 	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
 	panic("implement me")
 }
-func (s *Action) GetPropIndex(index uint64) (interface{}, string) {
+func (s *Action) Marshal() ([]byte, error) {
+	return proto.Marshal(s.Action)
+}
+func (s *Action) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	switch index {
 	case 0:
-		return s.Default(), s.FullString()
+		return s, s.FullString()
 	case 1:
-		return &protodata.Action{ActionDescription: s.ActionDescription()}, s.ActionDescriptionString()
+		return s, s.ActionDescriptionString()
 	case 2:
-		return &protodata.Action{Duration: s.Duration()}, s.DurationString()
+		return s, s.DurationString()
 	case 4:
-		return &protodata.Action{EndTime: s.EndTime()}, s.EndTimeString()
+		return s, s.EndTimeString()
 	case 3:
-		return &protodata.Action{StartTime: s.StartTime()}, s.StartTimeString()
+		return s, s.StartTimeString()
 	default:
-		return &protodata.Action{}, ""
+		return s, ""
 	}
 }
 
@@ -87,13 +92,18 @@ func (sl *ActionList) Set(actionlist *protodata.ActionList) {
 		sl.actionlist = append(sl.actionlist, action)
 	}
 }
-func (sl *ActionList) GetPropIndex(index uint64) (interface{}, string) {
-	protoList := make([]*protodata.Action, len(sl.actionlist))
+func (sl *ActionList) Marshal() ([]byte, error) {
+	actionList := &protodata.ActionList{}
+	for _, action := range sl.actionlist {
+		actionList.ActionList = append(actionList.ActionList, action.Action)
+	}
+	return proto.Marshal(actionList)
+}
+func (sl *ActionList) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	stringList := ""
 	for i, s := range sl.actionlist {
-		protoObj, stringObj := s.GetPropIndex(index)
-		protoList[i] = protoObj.(*protodata.Action)
+		_, stringObj := s.GetPropIndex(index)
 		stringList += strconv.Itoa(i) + ". " + stringObj + "\n"
 	}
-	return &protodata.ActionList{ActionList: protoList}, stringList
+	return sl, stringList
 }

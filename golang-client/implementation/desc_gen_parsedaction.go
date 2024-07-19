@@ -1,6 +1,10 @@
 package implementation
 
-import protodata "golang-client/message/protoData"
+import (
+	bpcontext "golang-client/bpcontext"
+	protodata "golang-client/message/protoData"
+	proto "google.golang.org/protobuf/proto"
+)
 
 type ParsedAction struct {
 	embedded_emojilist *EmojiData
@@ -28,13 +32,16 @@ func (s *ParsedAction) EmojiListString() string {
 	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
 	panic("implement me")
 }
-func (s *ParsedAction) GetPropIndex(index uint64) (interface{}, string) {
+func (s *ParsedAction) Marshal() ([]byte, error) {
+	return proto.Marshal(s.ParsedAction)
+}
+func (s *ParsedAction) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	switch index {
 	case 0:
-		return s.Default(), s.FullString()
+		return s, s.FullString()
 	case 1:
-		return &protodata.ParsedAction{EmojiList: s.EmojiList().EmojiData}, s.EmojiListString()
+		return s, s.EmojiListString()
 	default:
-		return &protodata.ParsedAction{}, ""
+		return s, ""
 	}
 }

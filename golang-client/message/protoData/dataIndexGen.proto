@@ -8,10 +8,10 @@ message EmojiData {
 }
 // --------------SystemData--------
 message Action {
-	string action_description = 1;
 	int32 duration = 2;
 	uint64 start_time = 3;
 	uint64 end_time = 4;
+	string action_description = 1;
 }
 message ActionList {
 	repeated Action action_list = 1;

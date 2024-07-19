@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func internalDataGen(conf *YamlConfig) {
+func internalDataGen(conf *DataYamlConfig) {
 	f := jen.NewFilePathName("implementation", "implementation")
 	sortedInternalData := SortData(conf.InternalData)
 	for _, data := range sortedInternalData {

@@ -7,7 +7,7 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-func (m *ActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
+func (m *ActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
 	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 	/*
@@ -34,11 +34,11 @@ func (m *ActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.QueryC
 	   return action
 	*/
 }
-func (m *ActionManager) Current(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
+func (m *ActionManager) Current(d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
 	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 }
-func (m *ActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) {
+func (m *ActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) {
 	log := logger.GetLogger().WithField("ActionManager", "SetServiceResponse")
 	protoActionList := &protodata.ActionList{}
 	err := proto.Unmarshal(response, protoActionList)

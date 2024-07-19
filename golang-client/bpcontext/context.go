@@ -72,7 +72,8 @@ type DataInstanceContextInterface interface {
 
 	//Data() *DataInstance
 	//SetData(protoData *DataInstance)
-	ClearDataContext()
+	GetQueryContext() QueryContextInterface
+	ClearQueryContext()
 	TryLockContext() bool
 	UnlockContext()
 	NewBranchContext() DataInstanceContextInterface
@@ -82,8 +83,8 @@ type DataInstanceContextInterface interface {
 
 //------------------------------------------------
 
-type DobitContext struct {
-	Dobit       DobitInterface
+type AgentContext struct {
+	Dobit       AgentInterface
 	DataContext QueryContextInterface
 }
 
@@ -102,7 +103,7 @@ type DobitContext struct {
 //		}
 //		return dataContext
 //	}
-func Context(d DobitInterface, ctx QueryContextInterface) *DobitContext {
+func NewAgentContext(d AgentInterface, ctx QueryContextInterface) *AgentContext {
 	if ctx == nil {
 		ctx = &FunctionContext{}
 	}
@@ -112,7 +113,7 @@ func Context(d DobitInterface, ctx QueryContextInterface) *DobitContext {
 		})
 	}
 
-	return &DobitContext{
+	return &AgentContext{
 		Dobit:       d,
 		DataContext: ctx,
 	}

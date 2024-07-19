@@ -5,7 +5,7 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-func descriptorGen(conf *YamlConfig) {
+func descriptorGen(conf *DataYamlConfig) {
 	f := jen.NewFilePathName("implementation", "implementation")
 	sortedDescriptor := SortDescriptor(conf.Descriptor)
 	for _, descEntry := range sortedDescriptor {
@@ -22,7 +22,7 @@ func descriptorGen(conf *YamlConfig) {
 		return
 	}
 }
-func entityGen(conf *YamlConfig) {
+func entityGen(conf *DataYamlConfig) {
 	f := jen.NewFilePathName("implementation", "implementation")
 	sortedSystemData := SortData(conf.SystemData)
 	sortedExternalData := SortData(conf.ExternalData)

@@ -22,7 +22,7 @@ func (m *ParsedActionManager) GetProps(protoData bpcontext.DataPropertyInterface
 	}
 	return byteStream, stringObj
 }
-func (m *ParsedActionManager) GetDescriptor(index uint64, d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
+func (m *ParsedActionManager) GetDescriptor(index uint64, d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
 	log := logger.GetLogger().WithField("func", "ParsedActionManagerGetDescriptor")
 	switch index {
 	case 0:

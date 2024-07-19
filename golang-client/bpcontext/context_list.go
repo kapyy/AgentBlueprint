@@ -229,14 +229,14 @@ func (s *StructuralContext) LinkNewQueryContext(input ...DataPropertyInterface) 
 	funcCtx := newFunctionContext(s)
 	if len(input) > 0 {
 		funcCtx.SetInputData(input[0])
-	} else {
-		funcCtx.SetInputData(s.queryContext.ResultData()[0])
 	}
 	s.queryContext = funcCtx
 	return funcCtx
 }
-
-func (s *StructuralContext) ClearDataContext() {
+func (s *StructuralContext) GetQueryContext() QueryContextInterface {
+	return s.queryContext
+}
+func (s *StructuralContext) ClearQueryContext() {
 	s.queryContext = nil
 }
 

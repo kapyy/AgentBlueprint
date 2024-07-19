@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"math"
 	"regexp"
 	"strings"
 
@@ -111,4 +112,16 @@ func convertProtoPropObj(prop_type string) *jen.Statement {
 		}
 	}
 	return type_statement
+}
+func GetFunctionFullIndex(functionType string, functionIndex int) int {
+	switch functionType {
+	case "DefaultFunction":
+		return int(1*math.Pow10(8)) + functionIndex
+	case "MinorFunction":
+		return int(2*math.Pow10(8)) + functionIndex
+	case "StaticFunction":
+		return int(3*math.Pow10(8)) + functionIndex
+	default:
+		return 0
+	}
 }

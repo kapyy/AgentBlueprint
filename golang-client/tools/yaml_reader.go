@@ -32,12 +32,47 @@ type KeyValue struct {
 	Value int
 }
 
-type YamlConfig struct {
+type DataYamlConfig struct {
 	Descriptor    map[string]map[string]int `yaml:"DataDescriptor"`
 	SystemData    map[string]DataFmt        `yaml:"PluralDataIndex"`
 	ExternalData  map[string]DataFmt        `yaml:"SingularDataIndex"`
 	InternalData  map[string]DataFmt        `yaml:"InternalDataIndex"`
 	ConnectorData map[string]DataFmt        `yaml:"ConnectionDataIndex"`
+}
+
+func (yc *DataYamlConfig) readYamlFile(filename string) *DataYamlConfig {
+	yamlFile, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal("Yaml File Read Error: ", err)
+	}
+	// mf := make(map[interface{}]interface{})
+	err = yaml.Unmarshal(yamlFile, yc)
+	if err != nil {
+		log.Fatal("Yaml File Unmarshal Error: ", err)
+	}
+	return yc
+}
+
+type FunctionFmt struct {
+	Type     string `yaml:"Type"`
+	ID       int    `yaml:"FunctionID"`
+	InputID  int    `yaml:"InputNode"`
+	OutputID int    `yaml:"OutputNode"`
+}
+type FunctionYamlConfig struct {
+	Functions map[string]FunctionFmt `yaml:"Functions"`
+}
+
+func (fyc *FunctionYamlConfig) readYamlFile(filename string) *FunctionYamlConfig {
+	yamlFile, err := os.ReadFile(filename)
+	if err != nil {
+		log.Fatal("Yaml File Read Error: ", err)
+	}
+	err = yaml.Unmarshal(yamlFile, fyc)
+	if err != nil {
+		log.Fatal("Yaml File Unmarshal Error: ", err)
+	}
+	return fyc
 }
 
 type DataEntry struct {
@@ -49,18 +84,9 @@ type sortedDataProperty struct {
 	Key   string
 	Value DetailedProperty
 }
-
-func (yc *YamlConfig) readYamlFile(filename string) *YamlConfig {
-	yamlFile, err := os.ReadFile(filename)
-	if err != nil {
-		log.Fatal("Yaml File Read Error: ", err)
-	}
-	// mf := make(map[interface{}]interface{})
-	err = yaml.Unmarshal(yamlFile, yc)
-	if err != nil {
-		log.Fatal("Yaml File Unmarshal Error: ", err)
-	}
-	return yc
+type sortedFunction struct {
+	Key   string
+	Value FunctionFmt
 }
 
 func SortDescriptor(descriptor map[string]map[string]int) []DescriptorEntry {
@@ -105,14 +131,23 @@ func SortDataProerty(data DataFmt) []sortedDataProperty {
 	sort.Slice(sorted_property, func(i, j int) bool { return sorted_property[i].Key < sorted_property[j].Key })
 	return sorted_property
 }
-
+func SortFunction(functions map[string]FunctionFmt) []sortedFunction {
+	var sortedFunctions []sortedFunction
+	for key, value := range functions {
+		sortedFunctions = append(sortedFunctions, sortedFunction{key, value})
+	}
+	sort.Slice(sortedFunctions, func(i, j int) bool {
+		return sortedFunctions[i].Value.ID < sortedFunctions[j].Value.ID
+	})
+	return sortedFunctions
+}
 func ReadDataDescriptor(overwrite bool) {
-	var yc YamlConfig
+	var dyc DataYamlConfig
 	abspath, err := filepath.Abs("./config/DataIndexGen.yaml")
 	if err != nil {
 		log.Fatal("Yaml File Read Error: ", err)
 	}
-	conf := yc.readYamlFile(abspath)
+	conf := dyc.readYamlFile(abspath)
 	fmt.Println("conf:", conf)
 
 	descriptorGen(conf)
@@ -121,4 +156,16 @@ func ReadDataDescriptor(overwrite bool) {
 	sysDataGen(conf, overwrite) // Has overwrite para
 	extDataGen(conf, overwrite) // has overwrite para
 	protoGen(conf)
+}
+func ReadFunctions() {
+	var fyc FunctionYamlConfig
+	abspath, err := filepath.Abs("./config/FunctionIndexGen.yaml")
+	if err != nil {
+		log.Fatal("Yaml File Read Error: ", err)
+	}
+	conf := fyc.readYamlFile(abspath)
+	fmt.Println("conf:", conf)
+	entityFunctionGen(conf)
+	entityInterfaceGen(conf)
+
 }

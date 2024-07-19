@@ -7,7 +7,7 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-func (m *ParsedActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
+func (m *ParsedActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
 	// TODO implement me, this is where you read this data from, could be connected to a database or a service
 	panic("implement me")
 	/*
@@ -21,7 +21,7 @@ func (m *ParsedActionManager) Default(d bpcontext.DobitInterface, ctx bpcontext.
 	   return action
 	*/
 }
-func (m *ParsedActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.DobitInterface, ctx bpcontext.QueryContextInterface) {
+func (m *ParsedActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) {
 	log := logger.GetLogger().WithField("ParsedActionManager", "SetServiceResponse")
 	protoParsedAction := &protodata.ParsedAction{}
 	err := proto.Unmarshal(response, protoParsedAction)

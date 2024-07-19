@@ -18,7 +18,7 @@ type Query struct {
 	BPFunctionNodes *message.NodeData
 }
 
-func (q *Query) call(d *DobitEntity, ctx *bpcontext.DobitContext) {
+func (q *Query) call(d *AgentEntity, ctx *bpcontext.AgentContext) {
 	//q.Query_mu.Lock()
 	//defer q.Query_mu.UnlockContext()
 	log := logger.GetLogger().WithField("func", "call")
@@ -32,7 +32,7 @@ func (q *Query) call(d *DobitEntity, ctx *bpcontext.DobitContext) {
 	}
 	//fmt.Printf("--------------End of Quring---------------")
 }
-func (d *DobitEntity) registerFunctionCall(functionNode *message.NodeData) {
+func (d *AgentEntity) registerFunctionCall(functionNode *message.NodeData) {
 	//call := d.Queries[functionNode.NodeId]
 	//call.BPFunctionNodes =  onNode
 	d.Queries[functionNode.NodeId] = Query{
@@ -41,7 +41,7 @@ func (d *DobitEntity) registerFunctionCall(functionNode *message.NodeData) {
 	}
 }
 
-func (d *DobitEntity) callMainFunction(node *message.NodeData, ctx *bpcontext.DobitContext) error {
+func (d *AgentEntity) callMainFunction(node *message.NodeData, ctx *bpcontext.AgentContext) error {
 	log := logger.GetLogger().WithField("func", "callMainFunction")
 	rqstNode, err := factory.DeserializeRootNode(node, ctx)
 	if err != nil {
@@ -67,7 +67,7 @@ func (d *DobitEntity) callMainFunction(node *message.NodeData, ctx *bpcontext.Do
 	datamgr.SetServiceResponse(response.MessageId, response.ResData, d, ctx.DataContext)
 	return nil
 }
-func (d *DobitEntity) callSubordinateFunction(function_id uint64, data_id uint64, data []byte, ctx bpcontext.QueryContextInterface) error {
+func (d *AgentEntity) callSubordinateFunction(function_id uint64, data_id uint64, data []byte, ctx bpcontext.QueryContextInterface) error {
 	log := logger.GetLogger().WithField("func", "callSubordinateFunction")
 	response, err := py_comm_client.SendSubordinateServiceRequest(function_id, data_id, data)
 	if err != nil {
@@ -88,7 +88,7 @@ func (d *DobitEntity) callSubordinateFunction(function_id uint64, data_id uint64
 	return nil
 }
 
-func DeserializeAPMToEntity(filename string, entity *DobitEntity) {
+func DeserializeAPMToEntity(filename string, entity *AgentEntity) {
 	log := logger.GetLogger().WithField("func", "DeserializeAPMToEntity")
 	in, err := os.ReadFile(filename)
 	if err != nil {
