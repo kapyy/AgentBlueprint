@@ -65,17 +65,17 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 			}
 
 		}
-		g.Op("*").Qual("golang-client/message/protoData", name)
+		g.Op("*").Qual("golang-client/message/proto", name)
 	})
-	descp.Func().Params(jen.Id("s").Id("*"+dataEntry.Key)).Id("Default").Call().Id("*").Qual("golang-client/message/protoData", name).Block(
-		//jen.Return(jen.Op("&").Qual("golang-client/message/protoData", name).Values(jen.DictFunc(func(d jen.Dict) {
+	descp.Func().Params(jen.Id("s").Id("*"+dataEntry.Key)).Id("Default").Call().Id("*").Qual("golang-client/message/proto", name).Block(
+		//jen.Return(jen.Op("&").Qual("golang-client/message/proto", name).Values(jen.DictFunc(func(d jen.Dict) {
 		//	for _, property := range sortedProperties {
 		//		d[jen.Id(property.Key)] = jen.Id("s").Dot(property.Key).Params()
 		//	}
 		//}))),
 		jen.Return(jen.Id("s").Dot(name)),
 	)
-	descp.Func().Params(jen.Id("s").Id("*" + dataEntry.Key)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/protoData", name)).BlockFunc(func(g *jen.Group) {
+	descp.Func().Params(jen.Id("s").Id("*" + dataEntry.Key)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/proto", name)).BlockFunc(func(g *jen.Group) {
 		for _, property := range sortedProperties {
 			if isEmbeddedProperty(property.Value.Type) {
 				g.Id("s").Dot("embedded_" + strings.ToLower(property.Key)).Dot("Set").Params(jen.Id(strings.ToLower(name)).Dot(property.Key))
@@ -146,7 +146,7 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 		descp.Type().Id(name + "List").Struct(
 			jen.Id(strings.ToLower(name + "List")).Id("[]*").Id(name),
 		)
-		descp.Func().Params(jen.Id("sl").Id("*" + name + "List")).Id("Set").Params(jen.Id(strings.ToLower(name+"List")).Id("*").Qual("golang-client/message/protoData", name+"List")).BlockFunc(func(g *jen.Group) {
+		descp.Func().Params(jen.Id("sl").Id("*" + name + "List")).Id("Set").Params(jen.Id(strings.ToLower(name+"List")).Id("*").Qual("golang-client/message/proto", name+"List")).BlockFunc(func(g *jen.Group) {
 			g.Id("sl").Dot(strings.ToLower(name+"List")).Op("=").Make(jen.Index().Op("*").Id(name), jen.Id("0"))
 			g.For(jen.Id("_,").Id("proto" + name).Op(":=").Range().Id(strings.ToLower(name + "List")).Dot(name + "List")).BlockFunc(func(gi *jen.Group) {
 				gi.Id(strings.ToLower(name)).Op(":=").Op("&").Id(name).Values()
@@ -155,14 +155,14 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 			})
 		})
 		//func (sl *ActionList) Marshal() ([]byte, error) {
-		//	actionList := &protodata.ActionList{}
+		//	actionList := &proto.ActionList{}
 		//	for _, action := range sl.actionlist {
 		//		actionList.ActionList = append(actionList.ActionList, action.Action)
 		//	}
 		//	return proto.Marshal(actionList)
 		//}
 		descp.Func().Params(jen.Id("sl").Id("*"+name+"List")).Id("Marshal").Params().Params(jen.Index().Byte(), jen.Error()).Block(
-			jen.Id(strings.ToLower(name)+"List").Op(":=").Op("&").Qual("golang-client/message/protoData", name+"List").Values(),
+			jen.Id(strings.ToLower(name)+"List").Op(":=").Op("&").Qual("golang-client/message/proto", name+"List").Values(),
 			jen.For(jen.Id("_,").Id(strings.ToLower(name)).Op(":=").Range().Id("sl").Dot(strings.ToLower(name+"List"))).Block(
 				jen.Id(strings.ToLower(name)+"List").Dot(name+"List").Op("=").Append(jen.Id(strings.ToLower(name)+"List").Dot(name+"List"), jen.Id(strings.ToLower(name)).Dot(name)),
 			),
@@ -186,7 +186,7 @@ func sysDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("Default").Params(jen.Id("d").Qual("golang-client/bpcontext", "AgentInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
 		jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 		jen.Panic(jen.Lit("implement me")),
-		jen.Comment("actions := &ActionList{}\n"+"actionList.Set(&protodata.ActionList{\n"+"Actions:[]*protodata.Action{\n"+"{\n"+"ActionDescription: \"go for a walk\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"},\n"+"},\n"+"})\n"+"return actionList\n"+"//ForPlural\n"+"action:=&Action{}\n"+"action.Set(&protodata.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
+		jen.Comment("actions := &ActionList{}\n"+"actionList.Set(&proto.ActionList{\n"+"Actions:[]*proto.Action{\n"+"{\n"+"ActionDescription: \"go for a walk\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"},\n"+"},\n"+"})\n"+"return actionList\n"+"//ForPlural\n"+"action:=&Action{}\n"+"action.Set(&proto.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
 	for _, desc := range conf.SystemData[name].Desc {
 		if conf.Descriptor[desc] != nil {
@@ -202,7 +202,7 @@ func sysDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 
 	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "AgentInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).BlockFunc(func(g *jen.Group) {
 		g.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit(name+"Manager"), jen.Lit("SetServiceResponse"))
-		g.Id("proto"+name+"List").Op(":=").Op("&").Qual("golang-client/message/protoData", name+"List").Values()
+		g.Id("proto"+name+"List").Op(":=").Op("&").Qual("golang-client/message/proto", name+"List").Values()
 		g.Id("err").Op(":=").Qual("google.golang.org/protobuf/proto", "Unmarshal").Call(jen.Id("response"), jen.Id("proto"+name+"List"))
 		g.If(jen.Id("err").Op("!=").Nil()).Block(
 			jen.Id("log").Dot("Errorf").Call(jen.Lit(name+"s Props ByteStream Handled Error: %s"), jen.Id("err")),
@@ -249,7 +249,7 @@ func sysDataMgrGen(mgr *jen.File, name string, conf *DataYamlConfig) {
 			jen.Id("log").Dot("Debugf").Call(jen.Lit("Conversion failed.GetProps List does not hold a *"+name)),
 		),
 		jen.Id("interfaceObj, stringObj").Op(":=").Id("listStruct").Dot("GetPropIndex").Call(jen.Id("index")),
-		jen.Id("serializeObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/protoData", name+"List")),
+		jen.Id("serializeObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/proto", name+"List")),
 		jen.If(jen.Op("!").Id("ok")).Block(
 			jen.Id("log").Dot("Debugf").Call(jen.Lit("Conversion failed.GetProps Return does not hold a *"+name)),
 		),

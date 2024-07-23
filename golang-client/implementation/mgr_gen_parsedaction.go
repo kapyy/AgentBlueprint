@@ -2,21 +2,21 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
+	proto "golang-client/message/proto"
 	logger "golang-client/modules/logger"
-	proto "google.golang.org/protobuf/proto"
+	proto1 "google.golang.org/protobuf/proto"
 )
 
 type ParsedActionManager struct{}
 
-func (m *ParsedActionManager) GetProps(protoData bpcontext.DataPropertyInterface, index uint64) ([]byte, string) {
+func (m *ParsedActionManager) GetProps(proto bpcontext.DataPropertyInterface, index uint64) ([]byte, string) {
 	log := logger.GetLogger().WithField("func", "ParsedActionManagerGetProps")
-	interfaceObj, stringObj := protoData.GetPropIndex(index)
-	protoObj, ok := interfaceObj.(*protodata.ParsedAction)
+	interfaceObj, stringObj := proto.GetPropIndex(index)
+	protoObj, ok := interfaceObj.(*proto.ParsedAction)
 	if !ok {
 		log.Debugf("Conversion failed. The interface does not hold a * %v.", "ParsedAction")
 	}
-	byteStream, err := proto.Marshal(protoObj)
+	byteStream, err := proto1.Marshal(protoObj)
 	if err != nil {
 		log.Errorf("ParsedActions Props ByteStream Handled Error: %v", err)
 	}

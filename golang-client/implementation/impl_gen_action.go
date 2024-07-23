@@ -2,9 +2,9 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
+	proto "golang-client/message/proto"
 	logger "golang-client/modules/logger"
-	proto "google.golang.org/protobuf/proto"
+	proto1 "google.golang.org/protobuf/proto"
 )
 
 func (m *ActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
@@ -12,8 +12,8 @@ func (m *ActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryC
 	panic("implement me")
 	/*
 	   actions := &ActionList{}
-	   actionList.Set(&protodata.ActionList{
-	   Actions:[]*protodata.Action{
+	   actionList.Set(&proto.ActionList{
+	   Actions:[]*proto.Action{
 	   {
 	   ActionDescription: "go for a walk",
 	   Duration: 0,
@@ -25,7 +25,7 @@ func (m *ActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryC
 	   return actionList
 	   //ForPlural
 	   action:=&Action{}
-	   action.Set(&protodata.Action{
+	   action.Set(&proto.Action{
 	   ActionDescription: "",
 	   Duration: 0,
 	   StartTime: 0,
@@ -40,8 +40,8 @@ func (m *ActionManager) Current(d bpcontext.AgentInterface, ctx bpcontext.QueryC
 }
 func (m *ActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) {
 	log := logger.GetLogger().WithField("ActionManager", "SetServiceResponse")
-	protoActionList := &protodata.ActionList{}
-	err := proto.Unmarshal(response, protoActionList)
+	protoActionList := &proto.ActionList{}
+	err := proto1.Unmarshal(response, protoActionList)
 	if err != nil {
 		log.Errorf("Actions Props ByteStream Handled Error: %s", err)
 	}

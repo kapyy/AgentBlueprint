@@ -1,0 +1,63 @@
+syntax = "proto3";
+package protoData;
+option go_package = "golang-client/message";
+
+import "message/proto/APMFactory.proto";
+
+//Main Service
+
+// We removed single module rpc calls from .proto,
+// which mean we will execute every function module within only python server,
+// we can use a single rpc call to send all the data Python server need
+// and let Python server to deserialize .apm file to fulfill the request.
+
+service APMService{
+  //Upload MainServiceStructure to Python Server
+  //returned with pre-defined data structure and its formatted data for game use
+  rpc MainServiceRequest(MainServicerRequest) returns (ServiceResponse);
+  rpc SubordinateServiceRequest(SubordinateServicerRequest) returns (ServiceResponse);
+}
+
+service SubFunctionalService{
+  rpc EmbeddingNounChunks(RequestPrompt) returns (WordList);
+  rpc EmbeddingSentence(RequestPrompt) returns (SentenceVec);
+  rpc EmbeddingList(RequestList) returns (WordList);
+  rpc EmbeddingTopic(RequestPrompt) returns (WordList);
+}
+
+message MainServicerRequest{
+  uint64 message_id = 1;//define service type
+  NodeData data = 2;
+}
+
+message SubordinateServicerRequest{
+  uint64 message_id = 1;//define service type
+  uint64 data_type =2;
+  bytes rqst_data = 3;
+}
+
+message ServiceResponse{
+  uint64 message_id = 1;//define service type
+  bytes res_data = 2;
+}
+//Custom Services does not have prompts
+//so currently NodeData for custom services is empty
+message RequestPrompt{
+  string prompt_sentence = 1;
+}
+message RequestList{
+  repeated string list = 1;
+}
+message WordList{
+  repeated WordVec words = 1;
+}
+message WordVec{
+  string word = 1;
+  int32 dimension = 2;
+  repeated float vec = 3;
+}
+message SentenceVec{
+  string sentence = 1;
+  int32 dimension = 2;
+  repeated float vec = 3;
+}

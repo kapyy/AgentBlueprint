@@ -11,14 +11,14 @@ func internalDataGen(conf *DataYamlConfig) {
 	for _, data := range sortedInternalData {
 		name := data.Key
 		f.Type().Id(name).StructFunc(func(g *jen.Group) {
-			g.Op("*").Qual("golang-client/message/protoData", name)
+			g.Op("*").Qual("golang-client/message/proto", name)
 		})
-		f.Func().Params(jen.Id("s").Id("*"+name)).Id("Default").Call().Id("*").Qual("golang-client/message/protoData", name).Block(
+		f.Func().Params(jen.Id("s").Id("*"+name)).Id("Default").Call().Id("*").Qual("golang-client/message/proto", name).Block(
 			//jen.Comment("TODO: implement me"),
 			//jen.Panic(jen.Lit("implement me")),
 			jen.Return(jen.Id("s").Dot(name)),
 		)
-		f.Func().Params(jen.Id("s").Id("*" + name)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/protoData", name)).Block(
+		f.Func().Params(jen.Id("s").Id("*" + name)).Id("Set").Params(jen.Id(strings.ToLower(name)).Id("*").Qual("golang-client/message/proto", name)).Block(
 			jen.Id("s").Dot(name).Op("=").Id(strings.ToLower(name)),
 		)
 		f.Func().Params(jen.Id("s").Id("*"+name)).Id("FullString").Call().Id("string").Block(

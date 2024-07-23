@@ -6,7 +6,7 @@ import (
 )
 
 func protoDataGen(conf *DataYamlConfig) {
-	f, err := os.Create("message/protoData/dataIndexGen.proto")
+	f, err := os.Create("../message/proto/dataIndexGen.proto")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -69,14 +69,14 @@ func protoDataGen(conf *DataYamlConfig) {
 //optional string system_prompt = 2;
 
 func protoFunctionGen(dataConf *DataYamlConfig, conf *FunctionYamlConfig) {
-	f, err := os.Create("message/protoData/functionDistribute.proto")
+	f, err := os.Create("../message/proto/functionDistribute.proto")
 	if err != nil {
 		fmt.Println(err)
 	}
 	f.WriteString("syntax = \"proto3\";\n")
-	f.WriteString("package protoData;\n")
+	f.WriteString("package proto;\n")
 	f.WriteString("option go_package = \"golang-client/message\";\n")
-	f.WriteString("import \"dataIndexGen.proto\";\n")
+	f.WriteString("import \"message/proto/dataIndexGen.proto\";\n")
 	f.WriteString("//Internal Python Service to distribute the apm request to individual functions\n")
 	f.WriteString("service APMFunctionsService{\n")
 	sortFunction := SortFunction(conf.Functions)

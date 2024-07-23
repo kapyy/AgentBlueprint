@@ -2,19 +2,19 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
-	proto "google.golang.org/protobuf/proto"
+	proto "golang-client/message/proto"
+	proto1 "google.golang.org/protobuf/proto"
 	"strconv"
 )
 
 type Action struct {
-	*protodata.Action
+	*proto.Action
 }
 
-func (s *Action) Default() *protodata.Action {
+func (s *Action) Default() *proto.Action {
 	return s.Action
 }
-func (s *Action) Set(action *protodata.Action) {
+func (s *Action) Set(action *proto.Action) {
 	s.Action = action
 }
 func (s *Action) FullString() string {
@@ -61,7 +61,7 @@ func (s *Action) StartTimeString() string {
 	panic("implement me")
 }
 func (s *Action) Marshal() ([]byte, error) {
-	return proto.Marshal(s.Action)
+	return proto1.Marshal(s.Action)
 }
 func (s *Action) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	switch index {
@@ -84,7 +84,7 @@ type ActionList struct {
 	actionlist []*Action
 }
 
-func (sl *ActionList) Set(actionlist *protodata.ActionList) {
+func (sl *ActionList) Set(actionlist *proto.ActionList) {
 	sl.actionlist = make([]*Action, 0)
 	for _, protoAction := range actionlist.ActionList {
 		action := &Action{}
@@ -93,11 +93,11 @@ func (sl *ActionList) Set(actionlist *protodata.ActionList) {
 	}
 }
 func (sl *ActionList) Marshal() ([]byte, error) {
-	actionList := &protodata.ActionList{}
+	actionList := &proto.ActionList{}
 	for _, action := range sl.actionlist {
 		actionList.ActionList = append(actionList.ActionList, action.Action)
 	}
-	return proto.Marshal(actionList)
+	return proto1.Marshal(actionList)
 }
 func (sl *ActionList) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	stringList := ""

@@ -2,19 +2,19 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
-	proto "google.golang.org/protobuf/proto"
+	proto "golang-client/message/proto"
+	proto1 "google.golang.org/protobuf/proto"
 )
 
 type ParsedAction struct {
 	embedded_emojilist *EmojiData
-	*protodata.ParsedAction
+	*proto.ParsedAction
 }
 
-func (s *ParsedAction) Default() *protodata.ParsedAction {
+func (s *ParsedAction) Default() *proto.ParsedAction {
 	return s.ParsedAction
 }
-func (s *ParsedAction) Set(parsedaction *protodata.ParsedAction) {
+func (s *ParsedAction) Set(parsedaction *proto.ParsedAction) {
 	s.embedded_emojilist.Set(parsedaction.EmojiList)
 	s.ParsedAction = parsedaction
 }
@@ -24,7 +24,7 @@ func (s *ParsedAction) FullString() string {
 func (s *ParsedAction) EmojiList() *EmojiData {
 	return s.embedded_emojilist
 }
-func (s *ParsedAction) SetEmojiList(emojilist *protodata.EmojiData) {
+func (s *ParsedAction) SetEmojiList(emojilist *proto.EmojiData) {
 	s.embedded_emojilist.Set(emojilist)
 	s.ParsedAction.EmojiList = emojilist
 }
@@ -33,7 +33,7 @@ func (s *ParsedAction) EmojiListString() string {
 	panic("implement me")
 }
 func (s *ParsedAction) Marshal() ([]byte, error) {
-	return proto.Marshal(s.ParsedAction)
+	return proto1.Marshal(s.ParsedAction)
 }
 func (s *ParsedAction) GetPropIndex(index uint64) (bpcontext.DataPropertyInterface, string) {
 	switch index {

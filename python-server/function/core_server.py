@@ -1,3 +1,7 @@
+import signal
+import sys
+import threading
+import time
 from concurrent import futures
 import logging
 import grpc
@@ -77,18 +81,24 @@ class BlueprintServicer(APMServiceServicer):
 #         word_list.words.append(word_vec)
 #     return word_list
 
+class CoreServerThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.port = "50051"
+        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self.stop_event = threading.Event()
 
-def ApmServeStart():
-    port = "50051"
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                         )
-    add_APMServiceServicer_to_server(BlueprintServicer(), server)
-    # add_SubFunctionalServiceServicer_to_server(FunctionalServicer(), server)
-    server.add_insecure_port("[::]:" + port)
-    # debug grpc
+    def run(self):
+        add_APMServiceServicer_to_server(BlueprintServicer(), self.server)
+        # add_SubFunctionalServiceServicer_to_server(FunctionalServicer(), server)
+        self.server.add_insecure_port("[::]:" + self.port)
+        # debug grpc
+        # logger.info("Server started, listening on " + self.port)
+        print("Core Server started, listening on " + self.port)
+        self.server.start()
+        self.stop_event.wait()
+        self.server.stop(0)
 
-    server.start()
-    print("Server started, listening on " + port)
-    logger.info("Server started, listening on " + port)
+    def stop(self):
+        self.stop_event.set()
 
-    server.wait_for_termination()

@@ -1,15 +1,15 @@
 package implementation
 
-import protodata "golang-client/message/protoData"
+import proto "golang-client/message/proto"
 
 type EmojiData struct {
-	*protodata.EmojiData
+	*proto.EmojiData
 }
 
-func (s *EmojiData) Default() *protodata.EmojiData {
+func (s *EmojiData) Default() *proto.EmojiData {
 	return s.EmojiData
 }
-func (s *EmojiData) Set(emojidata *protodata.EmojiData) {
+func (s *EmojiData) Set(emojidata *proto.EmojiData) {
 	s.EmojiData = emojidata
 }
 func (s *EmojiData) FullString() string {

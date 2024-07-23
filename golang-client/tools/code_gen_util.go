@@ -41,7 +41,7 @@ func convertIfReferenceWithGrpc(prop_type string) string {
 	prop_name_noprefix, isList := strings.CutPrefix(prop_type, "[]")
 	propName := prop_name_noprefix
 	if !isBaseType(prop_name_noprefix) {
-		propName = "*protodata." + propName
+		propName = "*proto." + propName
 	}
 	if isList {
 		propName = "[]" + propName
@@ -104,11 +104,11 @@ func convertProtoPropObj(prop_type string) *jen.Statement {
 			} else if prop_name_noprefix == "bool" {
 				type_statement = type_statement.Id("bool").Values()
 			} else {
-				type_statement = type_statement.Id("*").Qual("golang-client/message/protoData", prop_name_noprefix).Values()
+				type_statement = type_statement.Id("*").Qual("golang-client/message/proto", prop_name_noprefix).Values()
 			}
 
 		} else {
-			type_statement = jen.Id("&").Qual("golang-client/message/protoData", prop_name_noprefix).Values()
+			type_statement = jen.Id("&").Qual("golang-client/message/proto", prop_name_noprefix).Values()
 		}
 	}
 	return type_statement

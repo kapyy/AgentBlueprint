@@ -2,9 +2,9 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
+	proto "golang-client/message/proto"
 	logger "golang-client/modules/logger"
-	proto "google.golang.org/protobuf/proto"
+	proto1 "google.golang.org/protobuf/proto"
 )
 
 func (m *ParsedActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) bpcontext.DataPropertyInterface {
@@ -12,7 +12,7 @@ func (m *ParsedActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.
 	panic("implement me")
 	/*
 	   action:=&Action{}
-	   action.Set(&protodata.Action{
+	   action.Set(&proto.Action{
 	   ActionDescription: "",
 	   Duration: 0,
 	   StartTime: 0,
@@ -23,8 +23,8 @@ func (m *ParsedActionManager) Default(d bpcontext.AgentInterface, ctx bpcontext.
 }
 func (m *ParsedActionManager) SetServiceResponse(index uint64, response []byte, entity bpcontext.AgentInterface, ctx bpcontext.QueryContextInterface) {
 	log := logger.GetLogger().WithField("ParsedActionManager", "SetServiceResponse")
-	protoParsedAction := &protodata.ParsedAction{}
-	err := proto.Unmarshal(response, protoParsedAction)
+	protoParsedAction := &proto.ParsedAction{}
+	err := proto1.Unmarshal(response, protoParsedAction)
 	if err != nil {
 		log.Errorf("ParsedAction Props ByteStream Handled Error: %s", err)
 	}

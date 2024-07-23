@@ -2,9 +2,9 @@ package implementation
 
 import (
 	bpcontext "golang-client/bpcontext"
-	protodata "golang-client/message/protoData"
+	proto "golang-client/message/proto"
 	logger "golang-client/modules/logger"
-	proto "google.golang.org/protobuf/proto"
+	proto1 "google.golang.org/protobuf/proto"
 )
 
 type ActionManager struct {
@@ -30,11 +30,11 @@ func (m *ActionManager) GetProps(list bpcontext.DataPropertyInterface, index uin
 		log.Debugf("Conversion failed.GetProps List does not hold a *Action")
 	}
 	interfaceObj, stringObj := listStruct.GetPropIndex(index)
-	serializeObj, ok := interfaceObj.(*protodata.ActionList)
+	serializeObj, ok := interfaceObj.(*proto.ActionList)
 	if !ok {
 		log.Debugf("Conversion failed.GetProps Return does not hold a *Action")
 	}
-	byteStream, err := proto.Marshal(serializeObj)
+	byteStream, err := proto1.Marshal(serializeObj)
 	if err != nil {
 		log.Errorf("Actions Props ByteStream Handled Error: %v", err)
 	}

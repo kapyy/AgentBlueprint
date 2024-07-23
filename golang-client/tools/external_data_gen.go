@@ -61,7 +61,7 @@ func extDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 		jen.Comment("TODO implement me, this is where you read this data from, could be connected to a database or a service"),
 		jen.Panic(jen.Lit("implement me")),
 
-		jen.Comment("action:=&Action{}\n"+"action.Set(&protodata.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
+		jen.Comment("action:=&Action{}\n"+"action.Set(&proto.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
 	for _, desc := range conf.ExternalData[name].Desc {
 		if conf.Descriptor[desc] != nil {
@@ -75,7 +75,7 @@ func extDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 	}
 	impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("SetServiceResponse").Params(jen.Id("index").Uint64(), jen.Id("response").Id("[]byte"), jen.Id("entity").Qual("golang-client/bpcontext", "AgentInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).BlockFunc(func(g *jen.Group) {
 		g.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit(name+"Manager"), jen.Lit("SetServiceResponse"))
-		g.Id("proto"+name).Op(":=").Op("&").Qual("golang-client/message/protoData", name).Values()
+		g.Id("proto"+name).Op(":=").Op("&").Qual("golang-client/message/proto", name).Values()
 		g.Id("err").Op(":=").Qual("google.golang.org/protobuf/proto", "Unmarshal").Call(jen.Id("response"), jen.Id("proto"+name))
 		g.If(jen.Id("err").Op("!=").Nil()).Block(
 			jen.Id("log").Dot("Errorf").Call(jen.Lit(name+" Props ByteStream Handled Error: %s"), jen.Id("err")),
@@ -90,11 +90,11 @@ func extDataMgrGen(mgr *jen.File, name string, conf *DataYamlConfig) {
 	mgr.Type().Id(name + "Manager").Struct(
 	//jen.Id(name + "s").Id("[]" + name),
 	)
-	mgr.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("GetProps").Params(jen.Id("protoData").
+	mgr.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id("GetProps").Params(jen.Id("proto").
 		Qual("golang-client/bpcontext", "DataPropertyInterface"), jen.Id("index").Uint64()).Params(jen.Id("[]byte"), jen.Id("string")).Block(
 		jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(name+"ManagerGetProps")),
-		jen.Id("interfaceObj, stringObj").Op(":=").Id("protoData").Dot("GetPropIndex").Call(jen.Id("index")),
-		jen.Id("protoObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/protoData", name)),
+		jen.Id("interfaceObj, stringObj").Op(":=").Id("proto").Dot("GetPropIndex").Call(jen.Id("index")),
+		jen.Id("protoObj, ok").Op(":=").Id("interfaceObj").Assert(jen.Op("*").Qual("golang-client/message/proto", name)),
 		jen.If(jen.Id("!ok")).Block(
 			jen.Id("log").Dot("Debugf").Call(jen.Lit("Conversion failed. The interface does not hold a * %v."), jen.Lit(name))),
 		jen.Id("byteStream, err").Op(":=").Qual("google.golang.org/protobuf/proto", "Marshal").Call(jen.Id("protoObj")),
