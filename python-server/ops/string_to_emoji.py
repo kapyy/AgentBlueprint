@@ -5,6 +5,8 @@ import torch
 from sentence_transformers import SentenceTransformer
 from transformers import BartTokenizer, BartForConditionalGeneration
 
+import message.data.dataIndexGen_pb2
+
 
 # Model used
 # @article{DBLP:journals/corr/abs-2311-01751,
@@ -44,7 +46,7 @@ tokenizer = BartTokenizer.from_pretrained(path)
 generator = BartForConditionalGeneration.from_pretrained(path)
 generator.to(device)
 
-def StringToEmoji(content: str):
+def StringToEmoji(content: message.data.dataIndexGen_pb2.Action) -> message.data.dataIndexGen_pb2.ParsedAction:
     decoded = _translate_2_emoji(content, tokenizer, generator, num_beams=4, do_sample=True,
                                  max_length=100)
     logger.debug(f"Translated emoji: {decoded}")

@@ -5,11 +5,11 @@ import grpc
 from message.data.pythonServicer_pb2_grpc import APMServiceServicer, add_APMServiceServicer_to_server
 from message.data.pythonServicer_pb2 import ServiceResponse
 from factory.factory_handler import DeserializeFunctionNode, CallSubordinateFunction
-from util.service_config import SerivceConfig
+from util.service_config import ServiceConfig
 
 logger = logging.getLogger("kotoko.debug")
 
-config = SerivceConfig()
+config = ServiceConfig()
 config.embedding_model = 'all-MiniLM-L6-v2'
 config.host = '192.168.50.43'
 config.port = '19530'

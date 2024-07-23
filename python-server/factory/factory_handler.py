@@ -1,7 +1,7 @@
 import logging
 
 from .function_reflect_gen import MainServicerDistributorCaller, SerializeDataWithTypeID, \
-    SubServicerDistributionCaller
+    StaticFunctionDistributionCaller
 from .factory_util import isMinorFunction
 
 def DeserializeFunctionNode(node):
@@ -28,4 +28,4 @@ def DeserializeFunctionNode(node):
 
 def CallSubordinateFunction(function_id, data_id, data):
     serialized_data = SerializeDataWithTypeID(data, data_id)
-    return SubServicerDistributionCaller(function_id, serialized_data)
+    return StaticFunctionDistributionCaller(function_id, serialized_data)

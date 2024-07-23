@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 import os
 
-class SerivceConfig(BaseModel):
+class ServiceConfig(BaseModel):
     """
     Config of pipeline
     """

@@ -74,7 +74,7 @@ class LLMOp:
                     # prepare client prompts and contexts
                     client = OpenAI(api_key=config.openai_api_key)
                     unparsed_messages = [{"role": i, "content": f[0][i]} for i in f[0]]
-                    unparsed_messages.append({"role": "system", "content": "Role Play: All your actions should consider to the personality given in the prompt"})
+                    # unparsed_messages.append({"role": "system", "content": "Role Play: All your actions should consider to the personality given in the prompt"})
                     client_messages = _parse_input_openai(messages=unparsed_messages)
 
                     # call openai api
