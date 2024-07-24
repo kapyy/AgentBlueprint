@@ -6,8 +6,8 @@ from concurrent import futures
 import logging
 import grpc
 
-from message.data.pythonServicer_pb2_grpc import APMServiceServicer, add_APMServiceServicer_to_server
-from message.data.pythonServicer_pb2 import ServiceResponse
+from message.proto.pythonServicer_pb2_grpc import APMServiceServicer, add_APMServiceServicer_to_server
+from message.proto.pythonServicer_pb2 import ServiceResponse
 from factory.factory_handler import DeserializeFunctionNode, CallSubordinateFunction
 from util.service_config import ServiceConfig
 

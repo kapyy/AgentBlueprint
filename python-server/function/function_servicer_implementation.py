@@ -1,6 +1,6 @@
 import logging
-import message.data.dataIndexGen_pb2
-import message.data.functionDistribute_pb2_grpc
+import message.proto.dataIndexGen_pb2
+import message.proto.functionDistribute_pb2_grpc
 from prompt_template import prompt_template, response_format_gen, system_template
 from ops.jsonify_data import parse_json_list
 from ops.pipe_util import get_llm_op, get_prompt

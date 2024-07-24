@@ -1,0 +1,49 @@
+DataDescriptor:
+  None:
+    NoDescriptor: 00
+  Current:
+    Current: 20
+
+#Support int32 || string || bool || uint64 || float32 || uint32
+PluralDataIndex:
+  Action:
+    index: 1001
+    property:
+      ActionDescription:
+        index: 01
+        type: string
+      Duration:
+        index: 02
+        type: int32
+      StartTime:
+        index: 03
+        type: uint64
+      EndTime:
+        index: 04
+        type: uint64
+    descriptor:
+      - Current
+
+
+ConnectorDataIndex:
+
+InternalDataIndex:
+  EmojiData:
+    index: 3001
+    property:
+      EmojiDescription:
+        index: 01
+        type: string
+      EmojiUnicode:
+        index: 02
+        type: string
+    descriptor:
+
+SingularDataIndex:
+  ParsedAction:
+    index: 4001
+    property:
+      EmojiList:
+        index: 01
+        type: "EmojiData"
+    descriptor:

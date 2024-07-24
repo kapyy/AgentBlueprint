@@ -9,7 +9,7 @@ import logging
 import grpc
 from grpc_reflection.v1alpha import reflection
 
-from message.data import functionDistribute_pb2,functionDistribute_pb2_grpc
+from message.proto import functionDistribute_pb2,functionDistribute_pb2_grpc
 
 from function.function_servicer_implementation import APMFunctionsServiceServicer
 

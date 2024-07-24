@@ -25,9 +25,9 @@ def gen_function_reflect():
 import configparser
 import logging
 import grpc
-import message.data.dataIndexGen_pb2
-from message.data.functionDistribute_pb2 import GeneralPyRequest
-from message.data.functionDistribute_pb2_grpc import APMFunctionsServiceStub
+import message.proto.dataIndexGen_pb2
+from message.proto.functionDistribute_pb2 import GeneralPyRequest
+from message.proto.functionDistribute_pb2_grpc import APMFunctionsServiceStub
 config_parser = configparser.ConfigParser()
 config_parser.read('{config_file_path}')
 
@@ -43,7 +43,7 @@ config_parser.read('{config_file_path}')
         for (key,data) in dataList.items():
             lowercase_name = key.lower()
             file.write(f'    elif data_id == {data["index"]}:\n')
-            file.write(f'        {lowercase_name} = message.data.dataIndexGen_pb2.{key}()\n')
+            file.write(f'        {lowercase_name} = message.proto.dataIndexGen_pb2.{key}()\n')
             file.write(f'        {lowercase_name}.ParseFromString(data)\n')
             file.write(f'        return {lowercase_name}\n')
         file.write('    else:\n')
@@ -142,8 +142,8 @@ def function_implement():
         data_dict.update(data_yaml['InternalDataIndex'])
         func_yaml = yaml.load(open(func_yaml_path), Loader=yaml.FullLoader)
         file.write('import logging\n')
-        file.write('import message.data.dataIndexGen_pb2\n')
-        file.write('import message.data.functionDistribute_pb2_grpc\n')
+        file.write('import message.proto.dataIndexGen_pb2\n')
+        file.write('import message.proto.functionDistribute_pb2_grpc\n')
         file.write('from prompt_template import prompt_template, response_format_gen, system_template\n')
         file.write('from ops.jsonify_data import parse_json_list\n')
         file.write('from ops.pipe_util import get_llm_op, get_prompt\n')
@@ -176,7 +176,7 @@ def function_implement():
                 for (data_key,data_val) in data_dict.items():
                     if data_val['index'] == func_val['OutputNode']:
                         if func_val['Type'] == 'DefaultFunction':
-                            file.write(f'        {data_key.lower()}_list = message.data.dataIndexGen_pb2.{data_key}List()\n')
+                            file.write(f'        {data_key.lower()}_list = message.proto.dataIndexGen_pb2.{data_key}List()\n')
                             file.write(f'        if data is None:\n')
                             file.write(f'            return {data_key.lower()}_list\n')
                             file.write(f'        for {data_key.lower()} in data:\n')
@@ -187,7 +187,7 @@ def function_implement():
                                 elif _is_string_type(field_val['type']):
                                     type_example = '""'
                                 file.write(f'            {_camel_to_snake(field_key)} = {data_key.lower()}.get("{_camel_to_snake(field_key)}", {type_example})\n')
-                            file.write(f'            {data_key.lower()} = message.data.dataIndexGen_pb2.{data_key}(\n')
+                            file.write(f'            {data_key.lower()} = message.proto.dataIndexGen_pb2.{data_key}(\n')
                             for (field_key,field_val) in data_val['property'].items():
                                 file.write(f'                {_camel_to_snake(field_key)}={_camel_to_snake(field_key)},\n')
                             file.write(f'            )\n')
@@ -196,9 +196,9 @@ def function_implement():
                 file.write('\n\n')
             elif func_val['Type'] == 'StaticFunction':
                 with (open(os.path.join(static_ops_path,_camel_to_snake(f'{func_key}Handler.py')),'w+') as handler_file):
-                    handler_file.write('import message.data.dataIndexGen_pb2\n\n')
+                    handler_file.write('import message.proto.dataIndexGen_pb2\n\n')
                     # def StringToEmoji(
-                    #         content: message.data.dataIndexGen_pb2.Action) -> message.data.dataIndexGen_pb2.ParsedAction:
+                    #         content: message.proto.dataIndexGen_pb2.Action) -> message.proto.dataIndexGen_pb2.ParsedAction:
                     input_type,output_type = None,None
                     for (data_key,data_val) in data_dict.items():
                         if data_val['index'] == func_val['InputNode']:
@@ -208,9 +208,9 @@ def function_implement():
                     handler_file.write("#####################################\n"
                                        "#NEED IMPLEMENTATION FOR STATIC FUNCTION\n"
                                        "#####################################\n\n")
-                    handler_file.write(f'def {func_key}Handler(request: message.data.dataIndexGen_pb2.{input_type}) -> message.data.dataIndexGen_pb2.{output_type}:\n')
+                    handler_file.write(f'def {func_key}Handler(request: message.proto.dataIndexGen_pb2.{input_type}) -> message.proto.dataIndexGen_pb2.{output_type}:\n')
 
-                    handler_file.write(f'    return message.data.dataIndexGen_pb2.{output_type}()\n')
+                    handler_file.write(f'    return message.proto.dataIndexGen_pb2.{output_type}()\n')
                 file.write(f'    def {func_key}(self, request, context):\n')
 
                 file.write(f'        from ops.{_camel_to_snake(f"{func_key}Handler")} import {func_key}Handler\n')
