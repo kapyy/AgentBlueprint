@@ -4,13 +4,18 @@
 #The Type adds up to function ID to form a 9 digits id
 #(its actually 10 digits but the first digit is always 0 to differ from the DataNode Type)
 Functions:
-  InsertActionWithObservation:
+  GeneratePlans:
     Type: DefaultFunction
     FunctionID: 10000001 #must be 8 digits
     InputNode: 0 # Only used when its a static function
     OutputNode: 1001
-  ActionFormatter:
-    Type: StaticFunction
+  ExecutePlans:
+    Type: DefaultFunction
     FunctionID: 10000002 #must be 8 digits
-    InputNode: 1001 # default is all singular
-    OutputNode: 4001
+    InputNode: 0 # default is all singular
+    OutputNode: 4002
+  ReflectToMemories:
+    Type: StaticFunction
+    FunctionID: 10000003 #must be 8 digits
+    InputNode: 0
+    OutputNode: 1002

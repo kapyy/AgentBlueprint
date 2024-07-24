@@ -12,44 +12,45 @@ DataDescriptor:
 
 #Support int32 || string || bool || uint64 || float32 || uint32
 PluralDataIndex:
-  Action:
+  Plan:
     index: 1001
     property:
-      ActionDescription:
+      Description:
         index: 01
         type: string
-      Duration:
-        index: 02
-        type: int32
-      StartTime:
-        index: 03
-        type: uint64
-      EndTime:
-        index: 04
-        type: uint64
     descriptor:
       - Current
+  Memory:
+    index: 1002
+    property:
+      Description:
+        index: 01
+        type: string
+    descriptor:
 
 
 ConnectorDataIndex:
 
 InternalDataIndex:
-  EmojiData:
-    index: 3001
+
+SingularDataIndex:
+  AgentBackground:
+    index: 4001
     property:
-      EmojiDescription:
+      Name:
         index: 01
         type: string
-      EmojiUnicode:
+      Background:
         index: 02
         type: string
     descriptor:
-
-SingularDataIndex:
-  ParsedAction:
-    index: 4001
+  ExecuteResult:
+    index: 4002
     property:
-      EmojiList:
+      IsSucceed:
         index: 01
-        type: "EmojiData"
+        type: bool
+      Description:
+        index: 02
+        type: string
     descriptor:
