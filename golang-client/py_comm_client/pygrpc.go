@@ -2,7 +2,7 @@ package py_comm_client
 
 import (
 	"errors"
-	message "golang-client/message/protoData"
+	message "golang-client/message/proto"
 	"golang-client/modules/logger"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

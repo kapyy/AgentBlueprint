@@ -3,37 +3,52 @@ package tools
 import (
 	"fmt"
 	"github.com/dave/jennifer/jen"
+	"strings"
 )
 
-func entityFunctionGen(conf *FunctionYamlConfig) {
+func entityFunctionGen(conf *FunctionYamlConfig, dataConf *DataYamlConfig) {
 	f := jen.NewFilePathName("client_object", "dobit_client")
 	sortFunctions := SortFunction(conf.Functions)
 	for _, function := range sortFunctions {
+		_, outData := dataConf.getDataFromIndex(function.Value.OutputID)
 		switch function.Value.Type {
 		case "DefaultFunction":
-			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance"), jen.Id("input").Qual("golang-client/bpcontext", "UserInput")).Block(
+			outDataName := outData.Key + "List" //default function output always be a list
+			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance"), jen.Id("input").Qual("golang-client/bpcontext", "UserInput")).Id("*").Qual("golang-client/implementation", outDataName).Block(
+				jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(function.Key)),
 				jen.Id("queryctx").Op(":=").Id("i").Dot("LinkNewQueryContext").Call(jen.Id("i").Dot("Data").Call()),
 				jen.Id("query").Op(":=").Id("d").Dot("Queries").Index(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID))),
 				jen.Id("ctx").Op(":=").Qual("golang-client/bpcontext", "NewAgentContext").Call(jen.Id("d"), jen.Id("queryctx")),
 				jen.Id("queryctx").Dot("SetInputText").Call(jen.Op("&").Id("input").Dot("InputText")),
 				jen.Id("query").Dot("BPFunctionNodes").Dot("FunctionParam").Dot("InputText").Op("=").Op("&").Id("input").Dot("InputText"),
 				jen.Id("query").Dot("call").Call(jen.Id("d"), jen.Id("ctx")),
+				//	action,ok := queryctx.ResultData().(*implementation.ActionList)
+				//if !ok {
+				//	logger.GetLogger().Errorf("InsertActionWithObservation: data type error")
+				//}
+				//return action
+				jen.Id(strings.ToLower(outDataName)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outDataName)),
+				jen.If(jen.Op("!").Id("ok")).Block(jen.Id("log").Dot("Errorf").Call(jen.Lit(function.Key+": Return data type error"))),
+				jen.Return(jen.Id(strings.ToLower(outDataName))),
 			)
 		case "StaticFunction":
-			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance")).Block(
+			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance")).Id("*").Qual("golang-client/implementation", outData.Key).Block(
 				jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(function.Key)),
 				jen.Id("byteData").Op(",").Id("err").Op(":=").Id("i").Dot("Data").Call().Dot("Marshal").Call(),
 				jen.If(jen.Id("err").Op("!=").Nil()).Block(
 					jen.Id("log").Dot("Errorf").Call(jen.Lit("i.Data().Marshal error: %v"), jen.Id("err")),
-					jen.Return(),
+					jen.Return(jen.Nil()),
 				),
-				jen.Id("queryCtx").Op(":=").Id("i").Dot("LinkNewQueryContext").Call(jen.Id("i").Dot("Data").Call()),
+				jen.Id("queryctx").Op(":=").Id("i").Dot("LinkNewQueryContext").Call(jen.Id("i").Dot("Data").Call()),
 
-				jen.Id("err").Op("=").Id("d").Dot("callSubordinateFunction").Call(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID)), jen.Lit(function.Value.InputID), jen.Id("byteData"), jen.Id("queryCtx")),
+				jen.Id("err").Op("=").Id("d").Dot("callSubordinateFunction").Call(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID)), jen.Lit(function.Value.InputID), jen.Id("byteData"), jen.Id("queryctx")),
 				jen.If(jen.Id("err").Op("!=").Nil()).Block(
 					jen.Id("log").Dot("Errorf").Call(jen.Lit("callSubordinateFunction error: %v"), jen.Id("err")),
-					jen.Return(),
+					jen.Return(jen.Nil()),
 				),
+				jen.Id(strings.ToLower(outData.Key)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outData.Key)),
+				jen.If(jen.Op("!").Id("ok")).Block(jen.Id("log").Dot("Errorf").Call(jen.Lit(function.Key+": Return data type error"))),
+				jen.Return(jen.Id(strings.ToLower(outData.Key))),
 			)
 		}
 	}
@@ -52,16 +67,19 @@ func entityFunctionGen(conf *FunctionYamlConfig) {
 //	GetDataManager(mgr int) DataManagerInterface
 //}
 
-func entityInterfaceGen(conf *FunctionYamlConfig) {
+func entityInterfaceGen(conf *FunctionYamlConfig, dataConf *DataYamlConfig) {
 	f := jen.NewFilePathName("bpcontext", "bpcontext")
 	f.Type().Id("AgentInterface").InterfaceFunc(func(g *jen.Group) {
 		sortFunctions := SortFunction(conf.Functions)
 		for _, function := range sortFunctions {
+			_, outData := dataConf.getDataFromIndex(function.Value.OutputID)
 			switch function.Value.Type {
 			case "DefaultFunction":
-				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance"), jen.Id("input").Id("UserInput"))
+				outDataName := outData.Key + "List"
+				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance"), jen.Id("input").Id("UserInput")).Id("*").Qual("golang-client/implementation", outDataName)
 			case "StaticFunction":
-				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance"))
+				outDataName := outData.Key
+				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance")).Id("*").Qual("golang-client/implementation", outDataName)
 			}
 		}
 		g.Id("GetDataManager").Params(jen.Id("mgr").Int()).Id("DataManagerInterface")

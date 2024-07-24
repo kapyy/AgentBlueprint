@@ -7,11 +7,8 @@ import (
 	"golang-client/implementation"
 	"golang-client/py_comm_client"
 
-	"golang-client/message/protoData"
+	"golang-client/message/proto"
 	"golang-client/modules/logger"
-	"os"
-
-	"google.golang.org/protobuf/proto"
 )
 
 type Query struct {
@@ -26,9 +23,9 @@ func (q *Query) call(d *AgentEntity, ctx *bpcontext.AgentContext) {
 	err := d.callMainFunction(q.BPFunctionNodes, ctx)
 	if err != nil {
 		log.Errorf("MainFunction call Suspended: %v", err)
-		if ctx.DataContext.Callback() != nil && ctx.DataContext.Callback().ResponseCancel != nil {
-			ctx.DataContext.Callback().ResponseCancel()
-		}
+		//if ctx.DataContext.Callback() != nil && ctx.DataContext.Callback().ResponseCancel != nil {
+		//	ctx.DataContext.Callback().ResponseCancel()
+		//}
 	}
 	//fmt.Printf("--------------End of Quring---------------")
 }
@@ -86,25 +83,4 @@ func (d *AgentEntity) callSubordinateFunction(function_id uint64, data_id uint64
 	}
 	datamgr.SetServiceResponse(response.MessageId, response.ResData, d, ctx)
 	return nil
-}
-
-func DeserializeAPMToEntity(filename string, entity *AgentEntity) {
-	log := logger.GetLogger().WithField("func", "DeserializeAPMToEntity")
-	in, err := os.ReadFile(filename)
-	if err != nil {
-		log.Errorf("ReadFile error %v", err.Error())
-	}
-	object := message.ApmFile{}
-	err = proto.Unmarshal(in, &object)
-	if err != nil {
-		log.Errorf("Unmarshal error %v", err.Error())
-	}
-
-	for _, tree := range object.Trees {
-		//if tree.TreeType == 0 {
-		//	log.Fatal("DataNode cannot be root node")
-		//}
-		entity.registerFunctionCall(tree.RootNode)
-	}
-
 }

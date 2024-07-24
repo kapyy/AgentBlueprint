@@ -30,6 +30,35 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 5. There are few codes that need to be implemented.
 - Implement the data source at `golang-client/implementation/impl_gen_XXX`
   >when the data structure is generate, the data source needs to be connected to the original source, could be a database,RAG,runtime variable,temporary cache, etc.
-- 
----
 
+6. Write APM (Agent Personality Module).
+> APM file is the core blueprint of each agent, it contains every task's prompt. APM assembles runtime data with a data placeholder and prompt to execute a complete query.
+7. Initialize agent at `golang-client/client_object/agent_entity.go` and deserialize the pre-defined APM to load to the AgentEntity by calling `DeserializeAPMToEntity` function.
+8. Run the generated pipelines at `golang-client/client_object/entity_function_gen.go` returns the result of the Query.
+---
+## FAQ
+1. **What is a DataInstance Do?** <br>
+Data Instance is the data structure of everything, it contains the data its self, context information, and chaining information of where this data is from (always another DataInstance). So you can think it as the equivalent replacement to a data variable within the agent class.
+> In our vision, this Project will be built upon Data Instance structure entirely. DataInstance is the intermediate structure that connects between blueprint's runtime data call, LLM's query result, database's data retrieval. It more of a ECS(EntityComponentSystem) design pattern.
+2. **Why uses Data-Oriented Design?** <br>
+There are many reasons for that:
+   - *Data-Oriented Design gives a more controllable and retrievable data of each agent.* In an AI app development, the result that LLM returned are often used later in the application, so having a data structure that can be easily retrieved and manipulated is very handy. 
+   - *RAG support* Though this project has not shown any rag support yet. I have try to play around with RAG, and it seems that a clear data structure boosts retrieval's quality a lot from a graph point of view. Also, when it comes to graph Indexing, if a structure can be provided before hand, the indexing process will adapt to application's data structure frictionlessly.
+   - *Context Awareness* A unique context reference is connected to each data instance. When it comes to retrieving logical connections between data, the context will work as a tree that can be easily traversed. The Tree of Thoughts/ Chain of Thoughts is the most common example of this. Context design also frees up the task from being strictly sequential; it can be done in parallel or execut from desire node in the past.
+   - *Blueprint Support* This is where this project firstly started, we were trying to do a runtime data query with LLM at first. but to retrieve different data dynamically requires a tremendous amount of work. So we decided to build common data interface that adapts to the data indexing with whom the assembly can happen at resource level during runtime.
+3. **What Is .apm File** <br>
+APM or .apm file is a unique file format we defined, when I refer to Agent Blueprint / Assembly Structure. I mean this. It basically holds prompt information, with protobuf encoding. Each tasks can hold one or more unique LLM/LM prompts, and in that prompt all the runtime/static data is replaced by a placeholder. where assembly happens when the task is called, then the placeholder will be replaced by the actual data. It's something that looks like this:
+    ```
+    "{agent_information} \n" + \
+    "Yesterday activities: {daily_summary} \n" + \
+    "In addition, he has a special mission today, {today's mission}" + \
+    "with the above information provide a plan that this agent will do \n" + \
+    ```
+   or 
+    ```
+    Currently {agent_name} saw {interact_object_name}is in {interact_object_state} State,
+    Now {agent_name} is at {agent_location} in the {current_time},
+    What would he do next to react to this current situation?
+   ```
+    Even with the same task, to provide different .apm assemblies(blueprint) will result in different queries. This is the core of the blueprint structure - to make every task exchangeable and customizable.
+4. 

@@ -7,7 +7,7 @@ type FunctionContext struct {
 	inputText   *string
 	inputData   DataPropertyInterface //temp cache, if all function input uses DataInstance Data, then this can be removed
 	rootCache   *RootCache
-	resultData  []DataPropertyInterface //temp cache, if all function output to DataInstance Data, then this can be removed
+	resultData  DataPropertyInterface //temp cache, if all function output to DataInstance Data, then this can be removed
 	targetIndex uint64
 
 	contextRoot DataInstanceContextInterface
@@ -37,16 +37,16 @@ func (f *FunctionContext) SetRootCache(rootCache *RootCache) {
 	f.rootCache = rootCache
 }
 
-func (f *FunctionContext) ResultData() []DataPropertyInterface {
+func (f *FunctionContext) ResultData() DataPropertyInterface {
 	return f.resultData
 }
 func (f *FunctionContext) SetResultData(resData DataPropertyInterface) {
-	f.resultData = []DataPropertyInterface{resData}
-}
-
-func (f *FunctionContext) SetListResultData(resData []DataPropertyInterface) {
 	f.resultData = resData
 }
+
+//func (f *FunctionContext) SetListResultData(resData []DataPropertyInterface) {
+//	f.resultData = resData
+//}
 
 func (f *FunctionContext) TargetIndex() uint64 {
 	return f.targetIndex
@@ -122,16 +122,16 @@ func (g *DataNodeContext) SetRootCache(rootCache *RootCache) {
 	g.parentContext.SetRootCache(rootCache)
 }
 
-func (g *DataNodeContext) ResultData() []DataPropertyInterface {
+func (g *DataNodeContext) ResultData() DataPropertyInterface {
 	return g.parentContext.ResultData()
 }
 func (g *DataNodeContext) SetResultData(resData DataPropertyInterface) {
 	g.parentContext.SetResultData(resData)
 }
 
-func (g *DataNodeContext) SetListResultData(resData []DataPropertyInterface) {
-	g.parentContext.SetListResultData(resData)
-}
+//func (g *DataNodeContext) SetListResultData(resData []DataPropertyInterface) {
+//	g.parentContext.SetListResultData(resData)
+//}
 
 func (g *DataNodeContext) TargetIndex() uint64 {
 	return g.parentContext.TargetIndex()

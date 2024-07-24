@@ -44,9 +44,9 @@ type QueryContextInterface interface {
 	SetInputData(inputData DataPropertyInterface)
 	RootCache() *RootCache
 	SetRootCache(rootCache *RootCache)
-	ResultData() []DataPropertyInterface
+	ResultData() DataPropertyInterface
 	SetResultData(resData DataPropertyInterface)
-	SetListResultData(resData []DataPropertyInterface)
+	//SetListResultData(resData []DataPropertyInterface)
 	TargetIndex() uint64
 	SetTargetIndex(targetIndex uint64)
 	//No Runtime Changes on the Structure

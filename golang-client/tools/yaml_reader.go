@@ -196,8 +196,8 @@ func ReadFunctions() *FunctionYamlConfig {
 	return conf
 }
 func GenFunction(dataConf *DataYamlConfig, functionConf *FunctionYamlConfig) {
-	entityFunctionGen(functionConf)
-	entityInterfaceGen(functionConf)
+	entityFunctionGen(functionConf, dataConf)
+	entityInterfaceGen(functionConf, dataConf)
 	reflectionGen(functionConf)
 	protoFunctionGen(dataConf, functionConf)
 }
