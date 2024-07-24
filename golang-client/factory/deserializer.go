@@ -3,7 +3,7 @@ package factory
 import (
 	"fmt"
 	"golang-client/bpcontext"
-	message "golang-client/message/protoData"
+	message "golang-client/message/proto"
 	"golang-client/modules/logger"
 
 	"log"

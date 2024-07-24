@@ -1,3 +1,9 @@
+#dataID are 10 digits AABBBBCCDD
+#AA 11 are general Data, 12 are abstract Data
+#BBBB is the Node ID
+#CC is the Descriptor ID
+#DD is the Property ID
+
 DataDescriptor:
   None:
     NoDescriptor: 00
