@@ -3,7 +3,6 @@ package protoData;
 option go_package = "golang-client/message";
 
 
-//Every Node will take up to 5 input nodes and will have 1 output node
 message NodeConnector{
   map<int32,NodeData> input_nodes = 1;
 }
@@ -27,15 +26,15 @@ message NodeData{
 }
 
 message FileTree{
-  int32 tree_type = 1;// refers to FunctionIndexGen.yaml, id of blueprint base framework
+  int32 tree_type = 1;// Currently Not In Use || refers to FunctionIndexGen.yaml, id of blueprint base framework
   NodeData root_node = 2;// root node deserialize with APMFactory Node Data
-  bool is_default = 3;// Is using current tree as default tree
+  bool is_default = 3;// Currently Not In Use || Is using current tree as default tree
 
 }
 message apmFile{
   repeated FileTree trees = 1;//root node is the ending node of a single service
-  int32 usr_id = 2;
-  int32 character_id = 3;
+  int32 usr_id = 2; // Currently Not In Use
+  int32 character_id = 3; // Currently Not In Use
 }
 
 //into raw data slot in NodeData
