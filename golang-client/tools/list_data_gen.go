@@ -117,10 +117,15 @@ func sysDataDescGen(descp *jen.File, i int, dataEntry DataEntry, hasPlural bool)
 			}
 			g.Id("s").Dot(name).Dot(prop_name).Op("=").Id(strings.ToLower(prop_name))
 		})
-		descp.Func().Params(jen.Id("s").Id("*"+name)).Id(prop_name+"String").Call().Id("string").Block(
-			jen.Comment("TODO: implement me, this is where you write how you want you data to be recognized as natural language"),
-			jen.Panic(jen.Lit("implement me")),
-		)
+		descp.Func().Params(jen.Id("s").Id("*" + name)).Id(prop_name + "String").Call().Id("string").BlockFunc(func(g *jen.Group) {
+			g.Comment("Modify: this is where you define how you want your data to be recognized as natural language")
+			//return fmt.Sprintf("Action's Description is: %v\n", s.ActionDescription())
+			if isEmbeddedProperty(property.Value.Type) {
+				g.Return(jen.Qual("fmt", "Sprintf").Call(jen.Lit(name+"'s "+prop_name+" is: %v\n"), jen.Id("s").Dot(prop_name).Call().Dot("FullString").Call()))
+			} else {
+				g.Return(jen.Qual("fmt", "Sprintf").Call(jen.Lit(name+"'s "+prop_name+" is: %v\n"), jen.Id("s").Dot(prop_name).Call()))
+			}
+		})
 	}
 
 	descp.Func().Params(jen.Id("s").Id("*"+name)).Id("Marshal").Params().Params(jen.Index().Byte(), jen.Error()).Block(

@@ -1,6 +1,7 @@
 package implementation
 
 import (
+	"fmt"
 	bpcontext "golang-client/bpcontext"
 	proto "golang-client/message/proto"
 	proto1 "google.golang.org/protobuf/proto"
@@ -27,8 +28,8 @@ func (s *Action) SetActionDescription(actiondescription string) {
 	s.Action.ActionDescription = actiondescription
 }
 func (s *Action) ActionDescriptionString() string {
-	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
-	panic("implement me")
+	// Modify: this is where you define how you want your data to be recognized as natural language
+	return fmt.Sprintf("Action's ActionDescription is: %v\n", s.ActionDescription())
 }
 func (s *Action) Duration() int32 {
 	return s.Action.Duration
@@ -37,8 +38,8 @@ func (s *Action) SetDuration(duration int32) {
 	s.Action.Duration = duration
 }
 func (s *Action) DurationString() string {
-	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
-	panic("implement me")
+	// Modify: this is where you define how you want your data to be recognized as natural language
+	return fmt.Sprintf("Action's Duration is: %v\n", s.Duration())
 }
 func (s *Action) EndTime() uint64 {
 	return s.Action.EndTime
@@ -47,8 +48,8 @@ func (s *Action) SetEndTime(endtime uint64) {
 	s.Action.EndTime = endtime
 }
 func (s *Action) EndTimeString() string {
-	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
-	panic("implement me")
+	// Modify: this is where you define how you want your data to be recognized as natural language
+	return fmt.Sprintf("Action's EndTime is: %v\n", s.EndTime())
 }
 func (s *Action) StartTime() uint64 {
 	return s.Action.StartTime
@@ -57,8 +58,8 @@ func (s *Action) SetStartTime(starttime uint64) {
 	s.Action.StartTime = starttime
 }
 func (s *Action) StartTimeString() string {
-	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
-	panic("implement me")
+	// Modify: this is where you define how you want your data to be recognized as natural language
+	return fmt.Sprintf("Action's StartTime is: %v\n", s.StartTime())
 }
 func (s *Action) Marshal() ([]byte, error) {
 	return proto1.Marshal(s.Action)

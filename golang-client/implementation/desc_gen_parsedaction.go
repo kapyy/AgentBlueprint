@@ -1,6 +1,7 @@
 package implementation
 
 import (
+	"fmt"
 	bpcontext "golang-client/bpcontext"
 	proto "golang-client/message/proto"
 	proto1 "google.golang.org/protobuf/proto"
@@ -29,8 +30,8 @@ func (s *ParsedAction) SetEmojiList(emojilist *proto.EmojiData) {
 	s.ParsedAction.EmojiList = emojilist
 }
 func (s *ParsedAction) EmojiListString() string {
-	// TODO: implement me, this is where you write how you want you data to be recognized as natural language
-	panic("implement me")
+	// Modify: this is where you define how you want your data to be recognized as natural language
+	return fmt.Sprintf("ParsedAction's EmojiList is: %v\n", s.EmojiList().FullString())
 }
 func (s *ParsedAction) Marshal() ([]byte, error) {
 	return proto1.Marshal(s.ParsedAction)
