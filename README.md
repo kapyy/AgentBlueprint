@@ -38,7 +38,29 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 ---
 ## Step by Step Guide On how to use the framework
 #### To Build a Generative Agent Multi Agent Demo
-==Checkout Demo-GA branch==
+1. **Define Data Structure** <br>
+   Generative agent have plans, execute its plans, reflect it to memory, watch other people action and generate its own plans<br>
+   so we need to define the data structure for each of them.
+      - AgentBackground
+        - Name
+        - Background
+      - Plan
+        - description
+      - ExecuteResult
+        - isSucceed
+        - description
+      - Memory
+        - description 
+        
+2. **Define Function Tasks**<br>
+then we defined a few tasks that this agent will have
+      - generate plans 
+        - generate plans from nothing
+        - generate plans from other's plans
+      - execute plans
+      - reflect to memories
+3. write to two .yaml
+
 
 
 ---
