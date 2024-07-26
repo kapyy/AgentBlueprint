@@ -5,7 +5,7 @@ import yaml
 config_file_path = './conf.ini'
 function_gen_path = 'factory/function_reflect_gen.py'
 temp_resp_gen_path = 'prompt_template/response_format_gen.py'
-func_implement_path = 'function/function_servicer_implementation.py'
+func_implement_path = 'function/function_servicer_implementation1.py'
 static_ops_path = 'ops'
 data_yaml_path = 'config/DataIndexGen.yaml'
 func_yaml_path = 'config/FunctionIndexGen.yaml'
@@ -18,6 +18,10 @@ def _is_number_type(type):
     return type in ['int32', 'int64','uint32','uint64', 'float', 'double']
 def _is_string_type(type):
     return type in ['string']
+def _is_plural_type(id):
+    return 1000 <= id < 2000
+
+
 def gen_function_reflect():
 
     with (open(os.path.join(function_gen_path), 'w+') as file):
@@ -93,6 +97,7 @@ def _return_data_map_with_name(name, data_map) -> str:
             if not _is_base_type(field_type):
                 field_type = _return_data_map_with_name(field_type, data_map)
             map_desc += f'"{_camel_to_snake(field_key)}": {field_type},'
+        map_desc = map_desc.rstrip(',')
     map_desc += '}'
     return map_desc
 def _return_data_map(index, data_map) -> str:
@@ -105,6 +110,7 @@ def _return_data_map(index, data_map) -> str:
             if not _is_base_type(field_type):
                 field_type = _return_data_map_with_name(field_type, data_map)
             map_desc += f'"{_camel_to_snake(field_key)}": {field_type},'
+        map_desc = map_desc.rstrip(',')
     map_desc += '}'
     return map_desc
 def _return_prop_keys(index, data_map) -> str:
@@ -114,6 +120,7 @@ def _return_prop_keys(index, data_map) -> str:
             continue
         for (field_key, field_val) in data_val['property'].items():
             list_desc += f'"{_camel_to_snake(field_key)}",'
+        list_desc = list_desc.rstrip(',')
     return list_desc
 def template_response_gen():
     with (open(os.path.join(temp_resp_gen_path), 'w+') as file):
@@ -125,14 +132,32 @@ def template_response_gen():
         for (func_key,func_val) in func_yaml['Functions'].items():
             resp_data_index = func_val['OutputNode']
             file.write(f'{_camel_to_snake(func_key)}_response = """\n')
-            file.write(f'Return a JSON list with objects containing {_return_prop_keys(resp_data_index,data_dict)} keys.\n')
-            file.write('Example format are as follows:\n')
-            file.write('[\n')
-            for i in range(3):
-                file.write(f'    {_return_data_map(resp_data_index, data_dict)}')
-            file.write(']\n')
-            file.write('"""\n')
-
+            if _is_plural_type(resp_data_index):
+                file.write(f'Return a JSON list with objects containing {_return_prop_keys(resp_data_index,data_dict)} keys.\n')
+                file.write('Example format are as follows:\n')
+                file.write('[')
+                write_str = ""
+                for i in range(3):
+                    write_str += f'\n   {_return_data_map(resp_data_index, data_dict)},'
+                write_str = write_str.rstrip(',')
+                file.write(write_str)
+                file.write('\n]\n')
+                file.write('"""\n')
+            else:
+                file.write(f'Return a JSON object containing {_return_prop_keys(resp_data_index,data_dict)} keys.\n')
+                file.write('Example format are as follows:\n')
+                file.write(f'{_return_data_map(resp_data_index, data_dict)}\n')
+                file.write('"""\n')
+def _write_data_proto(parent_key,data_key,data_val,data_dict,df_prefix)-> str:
+    return_str = f'message.proto.dataIndexGen_pb2.{data_key}('
+    for (field_key, field_val) in data_val['property'].items():
+        if _is_base_type(field_val['type']):
+            return_str += f'{_camel_to_snake(field_key)}={df_prefix}["{_camel_to_snake(parent_key)}{_camel_to_snake(field_key)}"],'
+        else:
+            nested_str = _write_data_proto(parent_key + f'{field_key}.',field_val['type'], data_dict[field_val['type']],data_dict,df_prefix)
+            return_str += f'{_camel_to_snake(field_key)}= {nested_str},'
+    return_str += ')'
+    return return_str
 
 def function_implement():
     with (open(os.path.join(func_implement_path), 'w+') as file):
@@ -142,6 +167,8 @@ def function_implement():
         data_dict.update(data_yaml['InternalDataIndex'])
         func_yaml = yaml.load(open(func_yaml_path), Loader=yaml.FullLoader)
         file.write('import logging\n')
+        file.write('import json\n')
+        file.write('import pandas as pd\n')
         file.write('import message.proto.dataIndexGen_pb2\n')
         file.write('import message.proto.functionDistribute_pb2_grpc\n')
         file.write('from prompt_template import prompt_template, response_format_gen, system_template\n')
@@ -172,27 +199,29 @@ def function_implement():
                 file.write(f'        result = llm_caller(\n')
                 file.write(f'            formatted_prompt,\n')
                 file.write(f'        )\n')
-                file.write(f'        data = parse_json_list(result)\n')
+                file.write(f'        try:\n')
+                file.write(f'            data = json.loads(result)\n')
+                file.write(f'        except json.JSONDecodeError:\n')
+                file.write(f'            logger.error("JSONDecodeError: Failed to parse JSON data. Source data: %s", result)\n')
+                file.write(f'            data = None\n')
                 for (data_key,data_val) in data_dict.items():
                     if data_val['index'] == func_val['OutputNode']:
-                        if func_val['Type'] == 'DefaultFunction':
+                        if _is_plural_type(data_val['index']):
                             file.write(f'        {data_key.lower()}_list = message.proto.dataIndexGen_pb2.{data_key}List()\n')
                             file.write(f'        if data is None:\n')
-                            file.write(f'            return {data_key.lower()}_list\n')
-                            file.write(f'        for {data_key.lower()} in data:\n')
-                            for (field_key,field_val) in data_val['property'].items():
-                                type_example = None
-                                if _is_number_type(field_val['type']):
-                                    type_example = 0
-                                elif _is_string_type(field_val['type']):
-                                    type_example = '""'
-                                file.write(f'            {_camel_to_snake(field_key)} = {data_key.lower()}.get("{_camel_to_snake(field_key)}", {type_example})\n')
-                            file.write(f'            {data_key.lower()} = message.proto.dataIndexGen_pb2.{data_key}(\n')
-                            for (field_key,field_val) in data_val['property'].items():
-                                file.write(f'                {_camel_to_snake(field_key)}={_camel_to_snake(field_key)},\n')
-                            file.write(f'            )\n')
-                            file.write(f'            {data_key.lower()}_list.{data_key.lower()}_list.append({data_key.lower()})\n')
+                            file.write(f'           return {data_key.lower()}_list\n')
+                            file.write(f'        df = pd.json_normalize(data)\n')
+                            file.write(f'        for index, row in df.iterrows():\n')
+                            file.write(f'           {data_key.lower()} = {_write_data_proto("",data_key,data_val,data_dict,"row")}\n')
+                            file.write(f'           {data_key.lower()}_list.{data_key.lower()}_list.append({data_key.lower()})\n')
                             file.write(f'        return {data_key.lower()}_list\n')
+                        else: #Singular Type
+
+                            file.write(f'        if data is None:\n')
+                            file.write(f'           return message.proto.dataIndexGen_pb2.{data_key}()\n')
+                            file.write(f'        df = pd.json_normalize(data)\n')
+                            file.write(f'        {data_key.lower()} = {_write_data_proto("",data_key,data_val,data_dict,"df")}\n')
+                            file.write(f'        return {data_key.lower()}\n')
                 file.write('\n\n')
             elif func_val['Type'] == 'StaticFunction':
                 with (open(os.path.join(static_ops_path,_camel_to_snake(f'{func_key}Handler.py')),'w+') as handler_file):

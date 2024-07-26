@@ -24,8 +24,8 @@ func descriptorGen(conf *DataYamlConfig) {
 }
 func entityGen(conf *DataYamlConfig) {
 	f := jen.NewFilePathName("implementation", "implementation")
-	sortedSystemData := SortData(conf.SystemData)
-	sortedExternalData := SortData(conf.ExternalData)
+	sortedSystemData := SortData(conf.PluralData)
+	sortedExternalData := SortData(conf.SingularData)
 	f.Func().Id("InitMgrComponent").Params().BlockFunc(func(g *jen.Group) {
 		for _, data := range sortedSystemData {
 			g.Qual("golang-client/bpcontext", "RegisterMgrComponent").Call(jen.Lit(data.Value.Index), jen.Op("&").Id(data.Key+"Manager").Values())

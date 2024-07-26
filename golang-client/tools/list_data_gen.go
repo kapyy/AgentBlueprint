@@ -7,7 +7,7 @@ import (
 )
 
 func sysDataGen(conf *DataYamlConfig, overwrite bool) {
-	sortedSystemData := SortData(conf.SystemData)
+	sortedSystemData := SortData(conf.PluralData)
 	for i, data := range sortedSystemData {
 		name := data.Key
 		print("Generating " + name + "...\n")
@@ -32,12 +32,12 @@ func sysDataGen(conf *DataYamlConfig, overwrite bool) {
 }
 
 //func sysDataGen(conf *DataYamlConfig, overwrite bool) {
-//	//sortedSystemData := SortData(conf.SystemData)
-//	for name := range conf.SystemData {
+//	//sortedSystemData := SortData(conf.PluralData)
+//	for name := range conf.PluralData {
 //		print("Generating " + name + "...\n")
 //		if overwrite {
 //			f_descp := jen.NewFilePathName("implementation", "implementation")
-//			sysDataDescGen(f_descp, name,conf.SystemData , true)
+//			sysDataDescGen(f_descp, name,conf.PluralData , true)
 //			err := f_descp.Save("./implementation/desc_gen_" + strings.ToLower(name) + ".go")
 //			if err != nil {
 //				return
@@ -193,7 +193,7 @@ func sysDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 		jen.Panic(jen.Lit("implement me")),
 		jen.Comment("actions := &ActionList{}\n"+"actionList.Set(&proto.ActionList{\n"+"Actions:[]*proto.Action{\n"+"{\n"+"ActionDescription: \"go for a walk\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"},\n"+"},\n"+"})\n"+"return actionList\n"+"//ForPlural\n"+"action:=&Action{}\n"+"action.Set(&proto.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
-	for _, desc := range conf.SystemData[name].Desc {
+	for _, desc := range conf.PluralData[name].Desc {
 		if conf.Descriptor[desc] != nil {
 			sortedDescriptorProperties := SortDescriptorProperty(conf.Descriptor[desc])
 			for _, proerty := range sortedDescriptorProperties {
@@ -228,7 +228,7 @@ func sysDataMgrGen(mgr *jen.File, name string, conf *DataYamlConfig) {
 			g.Case(jen.Lit(0)).Block(
 				jen.Return(jen.Id("m").Dot("Default").Params(jen.Id("d"), jen.Id("ctx"))),
 			)
-			for _, desc := range conf.SystemData[name].Desc {
+			for _, desc := range conf.PluralData[name].Desc {
 				if conf.Descriptor[desc] != nil {
 					sortedDescriptorProperties := SortDescriptorProperty(conf.Descriptor[desc])
 					for _, property := range sortedDescriptorProperties {

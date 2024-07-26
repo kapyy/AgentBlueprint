@@ -6,7 +6,7 @@ import (
 )
 
 func extDataGen(conf *DataYamlConfig, overwrite bool) {
-	sortedExternalData := SortData(conf.ExternalData)
+	sortedExternalData := SortData(conf.SingularData)
 	for i, externalData := range sortedExternalData {
 		name := externalData.Key
 		print("Generating " + name + "...\n")
@@ -31,11 +31,11 @@ func extDataGen(conf *DataYamlConfig, overwrite bool) {
 			return
 		}
 	}
-	//for name := range conf.ExternalData {
+	//for name := range conf.SingularData {
 	//	print("Generating " + name + "...\n")
 	//	if overwrite {
 	//		f_descp := jen.NewFilePathName("implementation", "implementation")
-	//		sysDataDescGen(f_descp, name, conf.ExternalData, false)
+	//		sysDataDescGen(f_descp, name, conf.SingularData, false)
 	//		err := f_descp.Save("./implementation/desc_gen_" + strings.ToLower(name) + ".go")
 	//		if err != nil {
 	//			return
@@ -63,7 +63,7 @@ func extDataImplGen(impl *jen.File, name string, conf *DataYamlConfig) {
 
 		jen.Comment("action:=&Action{}\n"+"action.Set(&proto.Action{\n"+"ActionDescription: \"\",\n"+"Duration: 0,\n"+"StartTime: 0,\n"+"EndTime: 0,\n"+"})\n"+"return action"),
 	)
-	for _, desc := range conf.ExternalData[name].Desc {
+	for _, desc := range conf.SingularData[name].Desc {
 		if conf.Descriptor[desc] != nil {
 			for desc_name := range conf.Descriptor[desc] {
 				impl.Func().Params(jen.Id("m").Id("*"+name+"Manager")).Id(desc_name).Params(jen.Id("d").Qual("golang-client/bpcontext", "AgentInterface"), jen.Id("ctx").Qual("golang-client/bpcontext", "QueryContextInterface")).Qual("golang-client/bpcontext", "DataPropertyInterface").Block(
@@ -108,7 +108,7 @@ func extDataMgrGen(mgr *jen.File, name string, conf *DataYamlConfig) {
 			g.Case(jen.Lit(0)).Block(
 				jen.Return(jen.Id("m").Dot("Default").Params(jen.Id("d"), jen.Id("ctx"))),
 			)
-			for _, desc := range conf.ExternalData[name].Desc {
+			for _, desc := range conf.SingularData[name].Desc {
 				if conf.Descriptor[desc] != nil {
 					sortedDataDescriptorProperties := SortDescriptorProperty(conf.Descriptor[desc])
 					for _, property := range sortedDataDescriptorProperties {

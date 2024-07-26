@@ -7,3 +7,4 @@ openai
 sentence_transformers
 transformers
 pyyaml
+pandas

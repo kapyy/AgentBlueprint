@@ -8,7 +8,7 @@ Functions:
     Type: DefaultFunction
     FunctionID: 10000001 #must be 8 digits
     InputNode: 0 # Only used when its a static function
-    OutputNode: 1001
+    OutputNode: 4001
   ActionFormatter:
     Type: StaticFunction
     FunctionID: 10000002 #must be 8 digits

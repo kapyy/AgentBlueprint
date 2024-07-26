@@ -76,7 +76,7 @@ func (x *EmojiData) GetEmojiDescription() string {
 	return ""
 }
 
-// --------------SystemData--------
+// --------------PluralData--------
 type Action struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -195,7 +195,7 @@ func (x *ActionList) GetActionList() []*Action {
 	return nil
 }
 
-// --------------ExternalData--------
+// --------------SingularData--------
 type ParsedAction struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

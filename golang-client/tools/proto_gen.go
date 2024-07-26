@@ -24,8 +24,8 @@ func protoDataGen(conf *DataYamlConfig) {
 		}
 		f.WriteString("}\n")
 	}
-	f.WriteString("// --------------SystemData--------\n")
-	sortedSystemData := SortData(conf.SystemData)
+	f.WriteString("// --------------PluralData--------\n")
+	sortedSystemData := SortData(conf.PluralData)
 	for _, data := range sortedSystemData {
 		name := data.Key
 		f.WriteString("message " + name + " {\n")
@@ -37,8 +37,8 @@ func protoDataGen(conf *DataYamlConfig) {
 		f.WriteString("	repeated " + name + " " + ToSnakeCase(name) + "_list" + " = 1;\n")
 		f.WriteString("}\n")
 	}
-	f.WriteString("// --------------ExternalData--------\n")
-	sortedExternalData := SortData(conf.ExternalData)
+	f.WriteString("// --------------SingularData--------\n")
+	sortedExternalData := SortData(conf.SingularData)
 	for _, data := range sortedExternalData {
 		name := data.Key
 		f.WriteString("message " + name + " {\n")
@@ -87,7 +87,7 @@ func protoFunctionGen(dataConf *DataYamlConfig, conf *FunctionYamlConfig) {
 		case "DefaultFunction":
 			inputData = "GeneralPyRequest"
 			outDataType, outDataName := dataConf.getDataFromIndex(function.Value.OutputID)
-			if outDataType == "SystemData" {
+			if outDataType == "PluralData" {
 				outputData = outDataName.Key + "List"
 			} else {
 				outputData = outDataName.Key

@@ -13,26 +13,28 @@ func entityFunctionGen(conf *FunctionYamlConfig, dataConf *DataYamlConfig) {
 		_, outData := dataConf.getDataFromIndex(function.Value.OutputID)
 		switch function.Value.Type {
 		case "DefaultFunction":
-			outDataName := outData.Key + "List" //default function output always be a list
-			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance"), jen.Id("input").Qual("golang-client/bpcontext", "UserInput")).Id("*").Qual("golang-client/implementation", outDataName).Block(
-				jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(function.Key)),
-				jen.Id("queryctx").Op(":=").Id("i").Dot("LinkNewQueryContext").Call(jen.Id("i").Dot("Data").Call()),
-				jen.Id("query").Op(":=").Id("d").Dot("Queries").Index(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID))),
-				jen.Id("ctx").Op(":=").Qual("golang-client/bpcontext", "NewAgentContext").Call(jen.Id("d"), jen.Id("queryctx")),
-				jen.Id("queryctx").Dot("SetInputText").Call(jen.Op("&").Id("input").Dot("InputText")),
-				jen.Id("query").Dot("BPFunctionNodes").Dot("FunctionParam").Dot("InputText").Op("=").Op("&").Id("input").Dot("InputText"),
-				jen.Id("query").Dot("call").Call(jen.Id("d"), jen.Id("ctx")),
-				//	action,ok := queryctx.ResultData().(*implementation.ActionList)
-				//if !ok {
-				//	logger.GetLogger().Errorf("InsertActionWithObservation: data type error")
-				//}
-				//return action
-				jen.Id(strings.ToLower(outDataName)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outDataName)),
-				jen.If(jen.Op("!").Id("ok")).Block(jen.Id("log").Dot("Errorf").Call(jen.Lit(function.Key+": Return data type error"))),
-				jen.Return(jen.Id(strings.ToLower(outDataName))),
-			)
+			var outDataName string
+			if outDataName = outData.Key; dataConf.isPluralData(function.Value.OutputID) {
+				outDataName = outData.Key + "List"
+			}
+			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance"), jen.Id("input").Qual("golang-client/bpcontext", "UserInput")).Id("*").Qual("golang-client/implementation", outDataName).BlockFunc(func(g *jen.Group) {
+				g.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(function.Key))
+				g.Id("queryctx").Op(":=").Id("i").Dot("LinkNewQueryContext").Call(jen.Id("i").Dot("Data").Call())
+				g.Id("query").Op(":=").Id("d").Dot("Queries").Index(jen.Lit(GetFunctionFullIndex(function.Value.Type, function.Value.ID)))
+				g.Id("ctx").Op(":=").Qual("golang-client/bpcontext", "NewAgentContext").Call(jen.Id("d"), jen.Id("queryctx"))
+				g.Id("queryctx").Dot("SetInputText").Call(jen.Op("&").Id("input").Dot("InputText"))
+				g.Id("query").Dot("BPFunctionNodes").Dot("FunctionParam").Dot("InputText").Op("=").Op("&").Id("input").Dot("InputText")
+				g.Id("query").Dot("call").Call(jen.Id("d"), jen.Id("ctx"))
+				g.Id(strings.ToLower(outDataName)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outDataName))
+				g.If(jen.Op("!").Id("ok")).Block(jen.Id("log").Dot("Errorf").Call(jen.Lit(function.Key + ": Return data type error")))
+				g.Return(jen.Id(strings.ToLower(outDataName)))
+			})
 		case "StaticFunction":
-			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance")).Id("*").Qual("golang-client/implementation", outData.Key).Block(
+			var outDataName string
+			if outDataName = outData.Key; dataConf.isPluralData(function.Value.OutputID) {
+				outDataName = outData.Key + "List"
+			}
+			f.Func().Params(jen.Id("d").Op("*").Id("AgentEntity")).Id(function.Key).Params(jen.Id("i").Op("*").Qual("golang-client/bpcontext", "DataInstance")).Id("*").Qual("golang-client/implementation", outDataName).Block(
 				jen.Id("log").Op(":=").Qual("golang-client/modules/logger", "GetLogger").Call().Dot("WithField").Call(jen.Lit("func"), jen.Lit(function.Key)),
 				jen.Id("byteData").Op(",").Id("err").Op(":=").Id("i").Dot("Data").Call().Dot("Marshal").Call(),
 				jen.If(jen.Id("err").Op("!=").Nil()).Block(
@@ -46,9 +48,9 @@ func entityFunctionGen(conf *FunctionYamlConfig, dataConf *DataYamlConfig) {
 					jen.Id("log").Dot("Errorf").Call(jen.Lit("callSubordinateFunction error: %v"), jen.Id("err")),
 					jen.Return(jen.Nil()),
 				),
-				jen.Id(strings.ToLower(outData.Key)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outData.Key)),
+				jen.Id(strings.ToLower(outDataName)).Op(",").Id("ok").Op(":=").Id("queryctx").Dot("ResultData").Call().Assert(jen.Op("*").Qual("golang-client/implementation", outDataName)),
 				jen.If(jen.Op("!").Id("ok")).Block(jen.Id("log").Dot("Errorf").Call(jen.Lit(function.Key+": Return data type error"))),
-				jen.Return(jen.Id(strings.ToLower(outData.Key))),
+				jen.Return(jen.Id(strings.ToLower(outDataName))),
 			)
 		}
 	}
@@ -73,12 +75,14 @@ func entityInterfaceGen(conf *FunctionYamlConfig, dataConf *DataYamlConfig) {
 		sortFunctions := SortFunction(conf.Functions)
 		for _, function := range sortFunctions {
 			_, outData := dataConf.getDataFromIndex(function.Value.OutputID)
+			var outDataName string
+			if outDataName = outData.Key; dataConf.isPluralData(function.Value.OutputID) {
+				outDataName = outData.Key + "List"
+			}
 			switch function.Value.Type {
 			case "DefaultFunction":
-				outDataName := outData.Key + "List"
 				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance"), jen.Id("input").Id("UserInput")).Id("*").Qual("golang-client/implementation", outDataName)
 			case "StaticFunction":
-				outDataName := outData.Key
 				g.Id(function.Key).Params(jen.Id("i").Op("*").Id("DataInstance")).Id("*").Qual("golang-client/implementation", outDataName)
 			}
 		}

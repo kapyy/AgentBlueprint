@@ -34,8 +34,8 @@ type KeyValue struct {
 
 type DataYamlConfig struct {
 	Descriptor    map[string]map[string]int `yaml:"DataDescriptor"`
-	SystemData    map[string]DataFmt        `yaml:"PluralDataIndex"`
-	ExternalData  map[string]DataFmt        `yaml:"SingularDataIndex"`
+	PluralData    map[string]DataFmt        `yaml:"PluralDataIndex"`
+	SingularData  map[string]DataFmt        `yaml:"SingularDataIndex"`
 	InternalData  map[string]DataFmt        `yaml:"InternalDataIndex"`
 	ConnectorData map[string]DataFmt        `yaml:"ConnectionDataIndex"`
 }
@@ -52,15 +52,23 @@ func (yc *DataYamlConfig) readYamlFile(filename string) *DataYamlConfig {
 	}
 	return yc
 }
-func (yc *DataYamlConfig) getDataFromIndex(id int) (string, *DataEntry) {
-	for key, value := range yc.SystemData {
+func (yc *DataYamlConfig) isPluralData(id int) bool {
+	for _, value := range yc.PluralData {
 		if value.Index == id {
-			return "SystemData", &DataEntry{key, value}
+			return true
 		}
 	}
-	for key, value := range yc.ExternalData {
+	return false
+}
+func (yc *DataYamlConfig) getDataFromIndex(id int) (string, *DataEntry) {
+	for key, value := range yc.PluralData {
 		if value.Index == id {
-			return "ExternalData", &DataEntry{key, value}
+			return "PluralData", &DataEntry{key, value}
+		}
+	}
+	for key, value := range yc.SingularData {
+		if value.Index == id {
+			return "SingularData", &DataEntry{key, value}
 		}
 	}
 	for key, value := range yc.InternalData {

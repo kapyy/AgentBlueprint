@@ -21,6 +21,9 @@ PluralDataIndex:
       EndTime:
         index: 04
         type: uint64
+      Emoji:
+        index: 05
+        type: "EmojiData"
     descriptor:
       - Current
 

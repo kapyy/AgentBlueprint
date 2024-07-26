@@ -1,8 +1,6 @@
-import json
 import logging
-
+import json
 import pandas as pd
-
 import message.proto.dataIndexGen_pb2
 import message.proto.functionDistribute_pb2_grpc
 from prompt_template import prompt_template, response_format_gen, system_template
@@ -14,9 +12,11 @@ logger = logging.getLogger()
 config = ServiceConfig()
 config.embedding_device = 'cuda'
 
+
 class APMFunctionsServiceServicer(object):
     """Internal Python Service to distribute the apm request to individual functions
     """
+
     def InsertActionWithObservation(self, request, context):
         prompt_args = {
             "system": system_template.gpt_system_prompt,
@@ -36,26 +36,13 @@ class APMFunctionsServiceServicer(object):
         except json.JSONDecodeError:
             logger.error("JSONDecodeError: Failed to parse JSON data. Source data: %s", result)
             data = None
-
-        action_list = message.proto.dataIndexGen_pb2.ActionList()
         if data is None:
-            return action_list
+            return message.proto.dataIndexGen_pb2.ParsedAction()
         df = pd.json_normalize(data)
-        for index, row in df.iterrows():
-            action = message.proto.dataIndexGen_pb2.Action(
-                action_description=row["action_description"],
-                duration=row["duration"],
-                start_time=row["start_time"],
-                end_time=row["end_time"],
-                emoji=message.proto.dataIndexGen_pb2.EmojiData(
-                    emoji_description=row["emoji.emoji_description"],
-                    emoji_unicode=row["emoji.emoji_unicode"],
-                ),
-            )
-            action_list.action_list.append(action)
-
-        return action_list
-
+        parsedaction = message.proto.dataIndexGen_pb2.ParsedAction(
+            emoji_list=message.proto.dataIndexGen_pb2.EmojiData(emoji_description=df["emoji_list.emoji_description"],
+                                                                emoji_unicode=df["emoji_list.emoji_unicode"], ), )
+        return parsedaction
 
     def ActionFormatter(self, request, context):
         from ops.action_formatter_handler import ActionFormatterHandler
